@@ -36,3 +36,7 @@ Done by `study/bench/verify.py` against pristine copies, never by the agents.
 - **Descriptive:** verified claims per run, unverifiable claims, flaky claims confirmed, wall-clock time per run.
 
 With 8 projects per arm, results are reported as counts with Wilson intervals and a paired sign count, not as significance tests.
+
+## Deviations
+
+1. 16 October 2026, before any agent output was read: a claim on a function's `def` line is treated as a claim about that function, so its body replacements are among the mutants tried. Claims on other non-executable lines remain unverifiable.
