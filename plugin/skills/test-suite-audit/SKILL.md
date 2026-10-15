@@ -2,7 +2,6 @@
 name: test-suite-audit
 description: Audit a Python/pytest test suite for slow tests, intermittent failures, coverage overlap and weak fault detection (mutants and deleted behaviour that no test notices), and report evidence-backed findings. Use when the user asks to audit, review, speed up, prune or strengthen their test suite, or asks which tests are useful. Report-only.
 argument-hint: "quick | deep [--budget-minutes N] [--max-mutants N] [path]"
-allowed-tools: "Read Glob Grep Bash"
 ---
 
 # Test suite audit
