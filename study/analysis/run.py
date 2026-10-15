@@ -72,12 +72,13 @@ def table(name: str, df: pd.DataFrame, caption: str, label: str) -> None:
     df.to_csv(DERIVED / f"{name}.csv", index=False)
     cols = list(df.columns)
     lines = ["\\begin{table}[t]", "\\centering\\small",
+             *(["\\resizebox{\\linewidth}{!}{%"] if len(cols) > 8 else []),
              "\\begin{tabular}{l" + "r" * (len(cols) - 1) + "}", "\\toprule",
              " & ".join(_cell(c) for c in cols) + " \\\\", "\\midrule"]
     for row in df.itertuples(index=False):
         vals = [None if (isinstance(v, float) and math.isnan(v)) else (v.item() if hasattr(v, "item") else v) for v in row]
         lines.append(" & ".join(_cell(v) for v in vals) + " \\\\")
-    lines += ["\\bottomrule", "\\end{tabular}", f"\\caption{{{caption}}}", f"\\label{{{label}}}", "\\end{table}", ""]
+    lines += ["\\bottomrule", "\\end{tabular}" + ("}" if len(cols) > 8 else ""), f"\\caption{{{caption}}}", f"\\label{{{label}}}", "\\end{table}", ""]
     (GEN / f"{name}.tex").write_text("\n".join(lines))
 
 
@@ -600,7 +601,7 @@ def bench() -> None:
         macro(f"Bench{key}Unparsed", sum(not r["parsed"] for r in runs))
         macro(f"Bench{key}Flaky", len(fl))
         macro(f"Bench{key}FlakyConfirmed", sum(r["verdict"] == "confirmed" for r in fl))
-        macro(f"Bench{key}Minutes", statistics.median(mins) if mins else math.nan)
+        macro(f"Bench{key}Minutes", f"{statistics.median(mins):.1f}" if mins else "n/a")
         macro(f"Bench{key}VerifiedMutant", sum(r.get("why") == "a valid, activated mutant survived" for r in un))
         macro(f"Bench{key}VerifiedUncovered", sum(r.get("why") == "executable line that no test covers" for r in un))
         macro(f"Bench{key}RemovalUnverifiable", sum(r["verdict"] == "unverifiable" for r in rem))

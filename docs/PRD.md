@@ -241,3 +241,5 @@ We tested the design rules above on eight Python projects before relying on them
 | Flakiness needs more than reruns (F3) | Only 2 intermittent tests in 480 suite runs, both order-dependent | Order variation added to F3 |
 | Deletion as an economical first pass (F6a) | Not supported: 0.38x the survivors per CPU-minute of classical mutation (0.24-0.48) | Deletion kept for completeness and H3, not for cost |
 
+
+The plugin itself was then benchmarked against the same agent without it, with every claim checked independently ([study/BENCHMARK.md](../study/BENCHMARK.md), paper section 5). Precision of untested-behaviour claims was similar (100% against 95%). The skill's verified claims were mostly gaps in covered code (71 against 23), it never recommended a test removal, and it never edited source in place (the baseline did so in 3 of 8 runs). The benchmark also found a mutant-generation defect, now fixed, and showed that deep audits of projects over about 3,500 executable lines need more than 12 minutes.
