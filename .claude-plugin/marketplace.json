@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "test-suite-auditor",
+  "owner": {
+    "name": "Tim Richardson"
+  },
+  "description": "Test Suite Auditor for Claude Code",
+  "plugins": [
+    {
+      "name": "test-suite-auditor",
+      "source": "./",
+      "description": "Audit a pytest suite for cost, intermittent failures, coverage overlap and fault detection, with an evidence-backed report.",
+      "category": "development",
+      "license": "MIT"
+    }
+  ]
+}

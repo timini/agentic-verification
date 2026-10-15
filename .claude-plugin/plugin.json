@@ -1,0 +1,13 @@
+{
+  "name": "test-suite-auditor",
+  "displayName": "Test Suite Auditor",
+  "version": "0.1.0",
+  "description": "Audit a pytest suite for cost, intermittent failures, coverage overlap and fault detection, with an evidence-backed report. Report-only: never edits or deletes tests.",
+  "author": {
+    "name": "Tim Richardson",
+    "url": "https://github.com/timini"
+  },
+  "repository": "https://github.com/timini/test-suite-auditor",
+  "license": "MIT",
+  "keywords": ["testing", "pytest", "mutation-testing", "coverage", "flaky-tests", "test-quality"]
+}

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tsa"
+version = "0.1.0"
+description = "Deterministic runner for the Test Suite Auditor Claude Code plugin"
+requires-python = ">=3.12"
+dependencies = [
+    # Exact pin: we call mutmut's operator generator directly, which is not a public API.
+    "mutmut==3.8.0",
+    "coverage>=7.16,<8",
+    "numpy>=2.1",
+    "scipy>=1.14",
+]
+
+[project.scripts]
+tsa = "tsa.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=9"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tsa"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
