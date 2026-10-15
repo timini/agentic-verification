@@ -85,7 +85,7 @@ def test_invalid_mutant_is_not_a_kill(project, evidence):
     _, ws = project
     stable, _, _, muts = evidence
     m = next(m for m in muts if m.function == "is_adult")
-    bad = model.Mutant(**{**m.__dict__, "operator": "broken", "mutated_source": "def (:\n"})
+    bad = model.Mutant(**{**{k: getattr(m, k) for k in ("file", "population", "start_line", "end_line", "original", "replacement", "function")}, "operator": "broken", "base": "def (:\n"})
     assert execute_one(ws, Task(bad, tuple(stable), stable, 60)).status == model.INVALID
 
 

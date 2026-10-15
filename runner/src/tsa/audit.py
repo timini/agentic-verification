@@ -27,6 +27,7 @@ from .pytest_run import run_pytest
 
 SCHEMA_VERSION = 1
 OVERLAP_THRESHOLD = 0.9
+COVERAGE_EXCLUDE = r"#\s*(pragma|PRAGMA)[:\s]?\s*(no|NO)\s*(cover|COVER)"
 SLOW_TEST_S = 0.1  # below this a test is not worth a "slow" finding
 SEED = 20261015
 
@@ -240,7 +241,8 @@ def _executable_lines(ws) -> set:
     for f in ws.source_files():
         rel = str(f.relative_to(ws.root))
         try:
-            parser = PythonParser(filename=str(f))
+            # Same exclusion as coverage.py's default, so counts match pytest-cov's report.
+            parser = PythonParser(filename=str(f), exclude=COVERAGE_EXCLUDE)
             parser.parse_source()
             out |= {(rel, n) for n in parser.statements}
         except Exception:
@@ -249,13 +251,29 @@ def _executable_lines(ws) -> set:
 
 
 def _uncovered_by_file(eligible: set, covered: set) -> list[dict]:
-    per = defaultdict(lambda: [0, 0])
+    total = defaultdict(int)
+    missing = defaultdict(list)
     for f, n in eligible:
-        per[f][0] += 1
+        total[f] += 1
         if (f, n) not in covered:
-            per[f][1] += 1
-    rows = [{"file": f, "lines": t, "uncovered": u} for f, (t, u) in per.items() if u]
+            missing[f].append(n)
+    rows = [{"file": f, "lines": total[f], "uncovered": len(ns), "uncovered_lines": _ranges(sorted(ns))}
+            for f, ns in missing.items()]
     return sorted(rows, key=lambda r: -r["uncovered"])[:10]
+
+
+def _ranges(ns: list[int]) -> str:
+    """[1, 2, 3, 7] -> "1-3, 7"."""
+    out, start, prev = [], None, None
+    for n in ns + [None]:
+        if start is None:
+            start = prev = n
+        elif n is not None and n == prev + 1:
+            prev = n
+        else:
+            out.append(f"{start}-{prev}" if prev != start else f"{start}")
+            start = prev = n
+    return ", ".join(out)
 
 
 def _mutation(st: AuditState, ws, max_mutants: int | None, progress) -> None:
@@ -431,7 +449,7 @@ def _derive_findings(st: AuditState) -> None:
     unc = st.coverage.get("uncovered_by_file")
     if unc:
         F.append(Finding("uncovered", "coverage", "Files with most uncovered lines", "measured", 35,
-                         ", ".join(f"{u['file']} ({u['uncovered']}/{u['lines']})" for u in unc[:5]),
+                         "; ".join(f"{u['file']} lines {u['uncovered_lines']}" for u in unc[:5]),
                          "Uncovered code cannot be protected by any test; mutants there are reported as uncovered.",
                          evidence=[u["file"] for u in unc]))
     for name, why in st.not_assessed.items():

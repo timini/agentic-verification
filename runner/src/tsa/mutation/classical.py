@@ -11,6 +11,7 @@ import tempfile
 from pathlib import Path
 
 import libcst as cst
+from libcst._nodes.internal import CodegenState
 from libcst.metadata import MetadataWrapper, PositionProvider
 from mutmut import configuration as mutmut_configuration
 from mutmut.mutation.file_mutation import create_mutations
@@ -42,6 +43,27 @@ def generate(root: Path, rel_file: str) -> list[Mutant]:
     code = (root / rel_file).read_text()
     module, mutations, _, _ = create_mutations(rel_file, code)
     positions = MetadataWrapper(module, unsafe_skip_copy=True).resolve(PositionProvider)
+    base = module.code
+    # Character span of each top-level statement, and of each statement directly inside a
+    # top-level class. A mutant is applied by rewriting only the smallest of these that contains
+    # it, which gives exactly the text module.deep_replace(...) would at the cost of that block.
+    spans: list[tuple[cst.CSTNode, int, int, tuple[str, ...]]] = []
+    cursor = 0
+    for stmt in module.body:
+        text = module.code_for_node(stmt)
+        at = base.find(text, cursor)
+        cursor = at + len(text)
+        if isinstance(stmt, cst.ClassDef) and isinstance(stmt.body, cst.IndentedBlock):
+            indent = (stmt.body.indent or module.default_indent,)
+            inner = at
+            for child in stmt.body.body:
+                ctext = _render(module, child, indent)
+                cat = base.find(ctext, inner)
+                if cat < 0 or cat >= cursor:
+                    break
+                spans.append((child, cat, cat + len(ctext), indent))
+                inner = cat + len(ctext)
+        spans.append((stmt, at, at + len(text), ()))
     out: list[Mutant] = []
     for m in mutations:
         func = m.contained_by_top_level_function
@@ -52,8 +74,8 @@ def generate(root: Path, rel_file: str) -> list[Mutant]:
         pos = positions.get(m.original_node)
         if pos is None:
             continue
-        mutated = module.deep_replace(m.original_node, m.mutated_node)
-        assert isinstance(mutated, cst.Module)
+        stmt, s0, s1, indent = _containing(spans, positions, pos.start.line)
+        mutated_stmt = stmt.deep_replace(m.original_node, m.mutated_node)
         out.append(Mutant(
             file=rel_file,
             population="classical",
@@ -63,8 +85,42 @@ def generate(root: Path, rel_file: str) -> list[Mutant]:
             original=module.code_for_node(m.original_node),
             replacement=module.code_for_node(m.mutated_node),
             function=_qualname(module, func, positions),
-            mutated_source=mutated.code,
+            base=base, edit_start=s0, edit_end=s1, edit_text=_render(module, mutated_stmt, indent),
         ))
+    return out
+
+
+def _containing(spans, positions, line: int):
+    """Smallest recorded block containing ``line``: class members are listed before their class."""
+    for stmt, s0, s1, indent in spans:
+        p = positions[stmt]
+        if p.start.line <= line <= p.end.line:
+            return stmt, s0, s1, indent
+    raise LookupError(f"no top-level statement contains line {line}")
+
+
+def _render(module: cst.Module, node: cst.CSTNode, indent: tuple[str, ...]) -> str:
+    """Code for ``node`` as it appears in the module, at the given indentation."""
+    state = CodegenState(default_indent=module.default_indent, default_newline=module.default_newline)
+    state.indent_tokens.extend(indent)
+    node._codegen(state)
+    return "".join(state.tokens)
+
+
+def _reference(root: Path, rel_file: str) -> list[str]:
+    """The original whole-module construction, kept to test that generate() is identical."""
+    _default_config()
+    code = (root / rel_file).read_text()
+    module, mutations, _, _ = create_mutations(rel_file, code)
+    positions = MetadataWrapper(module, unsafe_skip_copy=True).resolve(PositionProvider)
+    out = []
+    for m in mutations:
+        func = m.contained_by_top_level_function
+        if not isinstance(func, cst.FunctionDef) or func.asynchronous is not None:
+            continue
+        if positions.get(m.original_node) is None:
+            continue
+        out.append(module.deep_replace(m.original_node, m.mutated_node).code)
     return out
 
 

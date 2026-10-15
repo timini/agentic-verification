@@ -63,3 +63,10 @@ def test_test_files_inside_package_are_not_mutated(tmp_path):
     p = Project(root=tmp_path, python=tmp_path / "python", source=("pkg",), tests=("pkg/tests",))
     assert sorted(str(f.relative_to(tmp_path)) for f in p.source_files()) == [
         "pkg/__init__.py", "pkg/core.py", "pkg/testing.py"]
+
+
+def test_line_ranges():
+    from tsa.audit import _ranges
+
+    assert _ranges([1, 2, 3, 7, 9, 10]) == "1-3, 7, 9-10"
+    assert _ranges([]) == ""

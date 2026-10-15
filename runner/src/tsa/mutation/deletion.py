@@ -104,12 +104,11 @@ def _body_mutants(rel_file, source, lines, site: FunctionSite) -> list[Mutant]:
     out = []
     for value in body_replacements(fn):
         new_first = f"{indent}return {value}\n"
-        mutated = _splice(lines, first.lineno, last.end_lineno, new_first)
         out.append(Mutant(
             file=rel_file, population="deletion", operator=f"body:{value}",
             start_line=first.lineno, end_line=last.end_lineno,
             original="".join(lines[first.lineno - 1 : last.end_lineno]),
-            replacement=new_first, function=site.qualname, mutated_source=mutated,
+            replacement=new_first, function=site.qualname, **_edit(lines, source, first.lineno, last.end_lineno, new_first),
         ))
     return out
 
@@ -131,14 +130,17 @@ def _call_mutants(rel_file, source, lines, site: FunctionSite) -> list[Mutant]:
             start_line=node.lineno, end_line=node.end_lineno,
             original="".join(lines[node.lineno - 1 : node.end_lineno]),
             replacement=new_first, function=site.qualname,
-            mutated_source=_splice(lines, node.lineno, node.end_lineno, new_first),
+            **_edit(lines, source, node.lineno, node.end_lineno, new_first),
         ))
     return out
 
 
-def _splice(lines: list[str], start: int, end: int, first: str) -> str:
-    blanks = ["\n"] * (end - start)
-    return "".join(lines[: start - 1] + [first] + blanks + lines[end:])
+def _edit(lines: list[str], source: str, start: int, end: int, first: str) -> dict:
+    """Replace lines start..end with ``first`` followed by blank lines, keeping line numbers."""
+    edit_start = sum(len(x) for x in lines[: start - 1])
+    edit_end = edit_start + sum(len(x) for x in lines[start - 1 : end])
+    return {"base": source, "edit_start": edit_start, "edit_end": edit_end,
+            "edit_text": first + "\n" * (end - start)}
 
 
 def _starts_line(lines, node) -> bool:

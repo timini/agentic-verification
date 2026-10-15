@@ -2,7 +2,8 @@
 
 import difflib
 import hashlib
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass, field
+from functools import cached_property
 
 # Normalized statuses (PRD F5). "killed" means a test that passed in every baseline run failed.
 KILLED = "killed"
@@ -26,9 +27,19 @@ class Mutant:
     original: str  # original source text of the region
     replacement: str  # replacement text
     function: str | None  # qualified name of the enclosing function, if any
-    mutated_source: str  # full text of the mutated file
+    # The mutant is stored as an edit of the original file text: base[edit_start:edit_end] is
+    # replaced by edit_text. All mutants of a file share one base string, so a large module's
+    # thousands of mutants do not each hold a full copy of it.
+    base: str = field(repr=False, compare=False)
+    edit_start: int = 0
+    edit_end: int = 0
+    edit_text: str = ""
 
     @property
+    def mutated_source(self) -> str:
+        return self.base[: self.edit_start] + self.edit_text + self.base[self.edit_end :]
+
+    @cached_property
     def id(self) -> str:
         h = hashlib.sha256()
         for part in (self.file, self.operator, str(self.start_line), self.mutated_source):
@@ -47,7 +58,7 @@ class Mutant:
         ))
 
     def record(self) -> dict:
-        d = asdict(self)
-        del d["mutated_source"]
+        d = {k: getattr(self, k) for k in ("file", "population", "operator", "start_line", "end_line",
+                                           "original", "replacement", "function")}
         d["id"] = self.id
         return d
