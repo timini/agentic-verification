@@ -1,3 +1,3 @@
 project,test,fails,runs,first_fail_run,fixed_fails,random_fails
-dateutil,tests/test_tz.py::ZoneInfoGettzTest::testZoneInfoDeprecated,45,60,1,30,15
 dateutil,tests/test_tz.py::ZoneInfoGettzTest::testZoneInfoMetadataDeprecated,15,60,31,0,15
+dateutil,tests/test_tz.py::ZoneInfoGettzTest::testZoneInfoDeprecated,45,60,1,30,15
