@@ -34,7 +34,7 @@ Then, in a pytest project:
 The project's environment needs Python 3.12+ and `pytest-cov`, and `pytest-randomly` for order checks. The runner also works on its own:
 
 ```bash
-uvx --from "git+https://github.com/timini/agentic-verification#subdirectory=runner" tsa deep path/to/project --budget-minutes 30
+uvx --from "git+https://github.com/timini/agentic-verification@v0.2.0#subdirectory=runner" tsa deep path/to/project --budget-minutes 30
 tsa replay --run path/to/project/.test-suite-audit/<run-id> --mutant <id>
 ```
 
@@ -83,7 +83,7 @@ Everything is in [`study/`](study/), which is evidence only and not part of the 
 
 ## Repository
 
-- [`skills/test-suite-audit/`](skills/test-suite-audit/): the skill Claude follows, with a [reference on why it refuses some conclusions](skills/test-suite-audit/reference/evidence.md).
+- [`plugin/`](plugin/): the plugin as installed. It holds the manifest and the [skill Claude follows](plugin/skills/test-suite-audit/SKILL.md), with a [reference on why it refuses some conclusions](plugin/skills/test-suite-audit/reference/evidence.md).
 - [`runner/`](runner/): the `tsa` runner (measurement, mutation, reports) and its tests.
 - [`fixtures/known_answers/`](fixtures/known_answers/): a small project with planted gaps that the runner's tests use.
 - [`docs/`](docs/): [product requirements](docs/PRD.md), [research notes](docs/RESEARCH.md) and the [behavioural ablation design](docs/BEHAVIOURAL_ABLATION.md).

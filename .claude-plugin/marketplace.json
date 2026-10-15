@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "agentic-verification",
-      "source": "./",
+      "source": "./plugin",
       "description": "Check that the tests guarding your code actually catch faults: audit a pytest suite for cost, order-dependent and intermittent failures, coverage overlap, and behaviour no test notices when it is removed. Report-only.",
       "category": "development",
       "license": "MIT"
