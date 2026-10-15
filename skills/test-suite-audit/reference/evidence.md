@@ -2,7 +2,7 @@
 
 These rules come from our pre-registered study of eight Python projects (attrs, more-itertools,
 dateutil, toolz, marshmallow, click, tomlkit, cachetools; 8,879 tests). Use the numbers when a
-user asks why the report will not say something. Paper: `study/paper/test-suite-auditor-study.pdf`
+user asks why the report will not say something. Paper: `study/paper/agentic-verification-study.pdf`
 in the plugin repository.
 
 | Tempting conclusion | What we measured | So the audit... |

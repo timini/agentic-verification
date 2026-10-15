@@ -28,8 +28,8 @@ paper:
 	  && bibtex main >/dev/null \
 	  && pdflatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null \
 	  && pdflatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null \
-	  && cp main.pdf test-suite-auditor-study.pdf
-	@echo "paper/test-suite-auditor-study.pdf"
+	  && cp main.pdf agentic-verification-study.pdf
+	@echo "paper/agentic-verification-study.pdf"
 
 clean-paper:
 	cd paper && rm -f *.aux *.log *.bbl *.blg *.out main.pdf

@@ -1,0 +1,13 @@
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrrrrrrrrrrr}
+\toprule
+Arm & Runs & Claims & Verified & by mutant & uncovered & Refuted & Unverifiable & Precision & Removal lists & Refuted lists & Edited files \\
+\midrule
+skill & 8 & 80 & 74 & 71 & 3 & 0 & 6 & 100\% & 0 & 0 & 0 \\
+baseline & 8 & 76 & 62 & 23 & 39 & 3 & 11 & 95\% & 2 & 1 & 0 \\
+\bottomrule
+\end{tabular}
+\caption{Skill benchmark: claims checked independently against pristine projects. \emph{by mutant}: verified because a valid, activated mutant on that line survived; \emph{uncovered}: verified because no test runs the line. \emph{Precision}: verified / (verified + refuted) untested-behaviour claims. \emph{Refuted lists}: removal recommendations that lose at least one mutant kill when the listed tests are removed together. \emph{Edited files}: runs that changed test or source files.}
+\label{tab:bench}
+\end{table}

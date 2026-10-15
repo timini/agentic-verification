@@ -548,6 +548,106 @@ def h6() -> None:
             "H6: intermittent tests observed.", "tab:h6detail")
 
 
+# ---------------------------------------------------------------- skill benchmark
+
+def bench() -> None:
+    import json as _json
+
+    vpath = STUDY / "data" / "bench" / "verification.jsonl"
+    if not vpath.exists():
+        return
+    recs = [_json.loads(l) for l in vpath.read_text().splitlines() if l.strip()]
+    # Verification is append-only; keep the latest pass for each (arm, project).
+    last = {}
+    for r in recs:
+        last[(r["arm"], r["project"])] = max(last.get((r["arm"], r["project"]), ""), r["vid"])
+    keep = [r for r in recs if r["vid"] == last[(r["arm"], r["project"])]]
+    ev = STUDY / "data" / "bench" / "events.jsonl"
+    times = defaultdict(dict)
+    if ev.exists():
+        for l in ev.read_text().splitlines():
+            e = _json.loads(l)
+            if e.get("event") in ("start", "end"):
+                times[e["run"]][e["event"]] = e["ts"]  # later records win (reruns)
+    rows, per_project = [], defaultdict(dict)
+    v0 = [r for r in keep if r["arm"] == "skill-v0" and r["kind"] == "untested"]
+    macro("BenchVzeroClaims", len(v0))
+    macro("BenchVzeroVerified", sum(r["verdict"] == "verified" for r in v0))
+    for arm in ("skill", "baseline"):
+        runs = [r for r in keep if r["arm"] == arm and r["kind"] == "run"]
+        un = [r for r in keep if r["arm"] == arm and r["kind"] == "untested"]
+        rem = [r for r in keep if r["arm"] == arm and r["kind"] == "removal"]
+        fl = [r for r in keep if r["arm"] == arm and r["kind"] == "flaky"]
+        v = sum(r["verdict"] == "verified" for r in un)
+        f = sum(r["verdict"] == "refuted" for r in un)
+        u = sum(r["verdict"] == "unverifiable" for r in un)
+        lo, hi = wilson(v, v + f)
+        recommending = [r for r in rem if r["verdict"] != "none recommended"]
+        refuted = [r for r in rem if r["verdict"] == "refuted"]
+        mins = [(t["end"] - t["start"]) / 60 for k, t in times.items() if k.startswith(arm + "/") and "end" in t]
+        key = "Skill" if arm == "skill" else "Base"
+        macro(f"Bench{key}Runs", len(runs))
+        macro(f"Bench{key}Claims", len(un))
+        macro(f"Bench{key}Verified", v)
+        macro(f"Bench{key}Refuted", f)
+        macro(f"Bench{key}Unverifiable", u)
+        macro(f"Bench{key}Precision", pct(v / (v + f)) if v + f else "n/a")
+        macro(f"Bench{key}PrecisionLo", pct(lo))
+        macro(f"Bench{key}PrecisionHi", pct(hi))
+        macro(f"Bench{key}Recommending", len(recommending))
+        macro(f"Bench{key}RemovalRefuted", len(refuted))
+        macro(f"Bench{key}Modified", sum(r["modified"] for r in runs))
+        macro(f"Bench{key}Unparsed", sum(not r["parsed"] for r in runs))
+        macro(f"Bench{key}Flaky", len(fl))
+        macro(f"Bench{key}FlakyConfirmed", sum(r["verdict"] == "confirmed" for r in fl))
+        macro(f"Bench{key}Minutes", statistics.median(mins) if mins else math.nan)
+        macro(f"Bench{key}VerifiedMutant", sum(r.get("why") == "a valid, activated mutant survived" for r in un))
+        macro(f"Bench{key}VerifiedUncovered", sum(r.get("why") == "executable line that no test covers" for r in un))
+        macro(f"Bench{key}RemovalUnverifiable", sum(r["verdict"] == "unverifiable" for r in rem))
+        for p in PROJECTS:
+            pu = [r for r in un if r["project"] == p]
+            pv, pf = sum(r["verdict"] == "verified" for r in pu), sum(r["verdict"] == "refuted" for r in pu)
+            per_project[p][arm] = (pv, pf, len(pu), any(r["verdict"] == "refuted" for r in rem if r["project"] == p))
+        rows.append({"Arm": arm, "Runs": len(runs), "Claims": len(un), "Verified": v,
+                     "by mutant": sum(r.get("why") == "a valid, activated mutant survived" for r in un),
+                     "uncovered": sum(r.get("why") == "executable line that no test covers" for r in un),
+                     "Refuted": f,
+                     "Unverifiable": u, "Precision": f"{100 * v / (v + f):.0f}%" if v + f else "--",
+                     "Removal lists": len(recommending), "Refuted lists": len(refuted),
+                     "Edited files": sum(r["modified"] for r in runs)})
+    table("bench", pd.DataFrame(rows), "Skill benchmark: claims checked independently against pristine projects. "
+          "\\emph{by mutant}: verified because a valid, activated mutant on that line survived; \\emph{uncovered}: verified because no test runs the line. "
+          "\\emph{Precision}: verified / (verified + refuted) untested-behaviour claims. \\emph{Refuted lists}: "
+          "removal recommendations that lose at least one mutant kill when the listed tests are removed together. "
+          "\\emph{Edited files}: runs that changed test or source files.", "tab:bench")
+    prows = []
+    better = worse = 0
+    for p in PROJECTS:
+        d = per_project[p]
+        if "skill" not in d or "baseline" not in d:
+            continue
+        def prec(t):
+            return t[0] / (t[0] + t[1]) if t[0] + t[1] else math.nan
+        ps, pb = prec(d["skill"]), prec(d["baseline"])
+        if not math.isnan(ps) and not math.isnan(pb):
+            better += ps > pb
+            worse += ps < pb
+        prows.append({"Project": p,
+                      "Skill verified/claims": f"{d['skill'][0]}/{d['skill'][2]}",
+                      "Skill refuted": d["skill"][1],
+                      "Baseline verified/claims": f"{d['baseline'][0]}/{d['baseline'][2]}",
+                      "Baseline refuted": d["baseline"][1],
+                      "Baseline removal refuted": "yes" if d["baseline"][3] else "no"})
+    obs = STUDY / "data" / "bench" / "observations.jsonl"
+    in_place = {_json.loads(l)["run"] for l in obs.read_text().splitlines() if l.strip()} if obs.exists() else set()
+    macro("BenchBaseInPlace", sum(1 for r in in_place if r.startswith("baseline/")))
+    macro("BenchSkillInPlace", sum(1 for r in in_place if r.startswith("skill/")))
+    macro("BenchPairedBetter", better)
+    macro("BenchPairedWorse", worse)
+    if prows:
+        table("bench_projects", pd.DataFrame(prows), "Skill benchmark per project.", "tab:benchprojects")
+
+
 def write_macros() -> None:
     lines = ["% Generated by study/analysis/run.py. Do not edit."]
     for k, v in sorted(macros.items()):
@@ -558,7 +658,7 @@ def write_macros() -> None:
 def main() -> None:
     for d in (DERIVED, GEN, FIG):
         d.mkdir(parents=True, exist_ok=True)
-    for step in (corpus_table, h1, h2, h3, h4, h5, h6):
+    for step in (corpus_table, h1, h2, h3, h4, h5, h6, bench):
         step()
         print(f"{step.__name__}: ok", flush=True)
     write_macros()

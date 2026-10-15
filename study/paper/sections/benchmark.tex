@@ -1,0 +1,38 @@
+\section{Skill benchmark}
+\label{sec:benchmark}
+
+The study above tests the rules the plugin is built on. This section tests the plugin itself: does an agent that follows the skill give maintainers better evidence than the same agent without it? The design was pre-registered in \texttt{study/BENCHMARK.md} before any run.
+
+\subsection{Design}
+
+For each of the eight projects we ran two Claude Code subagents on the same model (Sonnet) with the same task: find production behaviour the tests would not catch if it were broken or removed, tests that could be deleted, and flaky tests, in about 20 minutes, ending with a JSON block of claims. The \emph{skill} arm also received the text of the skill and the runner command; the \emph{baseline} arm could use any tool, including installing packages. Each run had a fresh copy of the project with its own environment. We used subagents because launching headless Claude Code with permissions bypassed was blocked by the local safety policy; the benchmark therefore tests the skill's instructions and runner, not whether Claude Code would trigger the skill unprompted.
+
+No claim was taken on trust. A separate verifier checked every claim against a pristine copy:
+\begin{itemize}
+  \item an \emph{untested-behaviour} claim (file and line) is \emph{verified} if a valid, activated mutant on that line survives or no test runs the line, \emph{refuted} if every valid mutant there is killed, and otherwise \emph{unverifiable};
+  \item a \emph{removal} list is \emph{refuted} if removing those tests together loses a mutant kill, checked on up to 100 mutants on the lines they cover;
+  \item a \emph{flaky} claim is \emph{confirmed} if the test was intermittent in the 60 study runs of H6;
+  \item a hash of every source and test file before and after each run detects files left modified.
+\end{itemize}
+
+\subsection{Results}
+
+\input{generated/bench}
+
+Table~\ref{tab:bench} summarises the 16 runs. All replies contained a parseable claim block.
+
+\paragraph{Precision (B1).} The skill arm made \BenchSkillClaims{} untested-behaviour claims: \BenchSkillVerified{} verified, \BenchSkillRefuted{} refuted and \BenchSkillUnverifiable{} unverifiable, a precision of \BenchSkillPrecision{} (Wilson 95\% CI \BenchSkillPrecisionLo{} to \BenchSkillPrecisionHi{}). The baseline arm made \BenchBaseClaims{}: \BenchBaseVerified{} verified, \BenchBaseRefuted{} refuted, \BenchBaseUnverifiable{} unverifiable, a precision of \BenchBasePrecision{} (\BenchBasePrecisionLo{} to \BenchBasePrecisionHi{}). The intervals overlap. Per project, the skill arm had the higher precision in \BenchPairedBetter{} projects and the lower in \BenchPairedWorse{}; the rest tied (Table~\ref{tab:benchprojects}). On precision alone, the expected advantage is in the predicted direction but not established: a capable agent that runs its own mutants and reads coverage makes few false claims.
+
+\input{generated/bench_projects}
+
+\paragraph{What kind of gap (exploratory).} The arms differ much more in \emph{which} gaps they find. Of the skill arm's verified claims, \BenchSkillVerifiedMutant{} were confirmed by a surviving mutant on a line the tests do execute, and \BenchSkillVerifiedUncovered{} by an uncovered line. For the baseline arm the split was \BenchBaseVerifiedMutant{} and \BenchBaseVerifiedUncovered{}: most of its verified claims restate the coverage report. Gaps in covered code are the ones coverage cannot show, and they are what H3 found to be common. This comparison was not pre-registered, so we report it as descriptive.
+
+\paragraph{Removal advice (B2).} No skill run recommended removing a test. Two baseline runs did. One list (toolz, \texttt{test\_for\_coverage}) was refuted: removing that test loses a mutant kill. The other (dateutil, eight import-only tests) is unverifiable, because those tests cover no production lines in their run phase.
+
+\paragraph{Safety (B3).} No run in either arm left a test or source file modified. However, \BenchBaseInPlace{} of the 8 baseline agents reported mutating production source \emph{in place} in the workspace during the run and restoring it afterwards; \BenchSkillInPlace{} skill runs did, because the runner always works in a disposable copy. In a user's real checkout, an interrupted in-place mutation leaves broken code behind.
+
+\paragraph{Flakiness.} The skill run on dateutil reported the two order-dependent tests that H6 found, and both are confirmed. (The earlier run on the defective runner also listed a third test, from a property-test directory the study excluded, which was not observed to be intermittent.) No baseline run claimed a flaky test.
+
+\paragraph{Cost.} The skill arm took longer: a median of \BenchSkillMinutes{} minutes from launch to report, against \BenchBaseMinutes{} for the baseline, because it runs a budgeted deep audit. Four runs shared the machine at a time, so these times are indicative only.
+
+\paragraph{A defect found by the benchmark.} The first skill runs on more-itertools and dateutil stopped early: generating classical mutants rebuilt the whole syntax tree for every mutant, which took 319\,s for one 5,000-line module, inside the agent's budget. We fixed the runner to rewrite only the enclosing block (identical mutants, confirmed by regenerating every mutant ID recorded in H2) and repeated those two runs; the table uses the repeated runs, as recorded in the benchmark's deviations. The two original runs made \BenchVzeroClaims{} claims, of which \BenchVzeroVerified{} were verified; the more-itertools run made none, because no mutant ran. Even with the fix, several skill runs ended their deep audits early on these budgets (dateutil and click ran only part of the deletion population), which the agents reported as partial.

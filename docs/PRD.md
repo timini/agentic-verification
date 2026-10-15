@@ -230,7 +230,7 @@ The product promise is practical and limited: make the evidence behind test-suit
 
 ## 11. Evidence from our study
 
-We tested the design rules above on eight Python projects before relying on them. The paper is [study/paper/test-suite-auditor-study.pdf](../study/paper/test-suite-auditor-study.pdf); hypotheses and deviations are in [study/PREREGISTRATION.md](../study/PREREGISTRATION.md).
+We tested the design rules above on eight Python projects before relying on them. The paper is [study/paper/agentic-verification-study.pdf](../study/paper/agentic-verification-study.pdf); hypotheses and deviations are in [study/PREREGISTRATION.md](../study/PREREGISTRATION.md).
 
 | Rule | Study result | Effect on this PRD |
 | --- | --- | --- |

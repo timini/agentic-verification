@@ -1,15 +1,15 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
-  "name": "test-suite-auditor",
+  "name": "agentic-verification",
   "owner": {
     "name": "Tim Richardson"
   },
-  "description": "Test Suite Auditor for Claude Code",
+  "description": "Agentic Verification: test-suite audits for Claude Code",
   "plugins": [
     {
-      "name": "test-suite-auditor",
+      "name": "agentic-verification",
       "source": "./",
-      "description": "Audit a pytest suite for cost, intermittent failures, coverage overlap and fault detection, with an evidence-backed report.",
+      "description": "Check that the tests guarding your code actually catch faults: audit a pytest suite for cost, order-dependent and intermittent failures, coverage overlap, and behaviour no test notices when it is removed. Report-only.",
       "category": "development",
       "license": "MIT"
     }

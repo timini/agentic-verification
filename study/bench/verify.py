@@ -23,6 +23,7 @@ from .prepare import BENCH, tree_hash
 
 DATA = STUDY / "data" / "bench"
 SEED = 20261016
+VID = __import__("time").strftime("%Y%m%dT%H%M%S")  # identifies one verification pass
 MAX_PER_CLAIM = 6
 MAX_REMOVAL_MUTANTS = 100
 VALID = ("killed", "survived")
@@ -130,7 +131,8 @@ def verify_removal(e, prep, tests, rng):
         if r.status == "killed" and set(r.killers) <= removed:
             lost.append(t.mutant.id)
     rec.update(mutants=len(tasks), killed=sum(results[id(t)].status == "killed" for t in tasks), lost=lost)
-    if not removed:
+    if not removed or not tasks:
+        # No in-scope tests, or the tests cover no production lines: nothing can refute or support it.
         rec["verdict"] = "unverifiable"
     else:
         rec["verdict"] = "refuted" if lost else "not refuted"
@@ -155,15 +157,20 @@ def main() -> None:
     with open(out_path, "a") as fh:
         for e in corpus.load(only):
             prep = prepare(e)
-            for arm in ("skill", "baseline"):
+            for arm in ("skill", "baseline", "skill-v0"):
                 reply_path = DATA / arm / f"{e.name}.md"
                 if not reply_path.exists():
                     continue
                 rng = random.Random(f"{SEED}-{arm}-{e.name}")
                 reply = parse_reply(reply_path.read_text())
-                base = {"arm": arm, "project": e.name}
-                ws = Path(workspaces[(arm, e.name)]["workspace"])
-                modified = tree_hash(ws, e) != workspaces[(arm, e.name)]["hash_before"]
+                base = {"arm": arm, "project": e.name, "vid": VID}
+                if arm == "skill-v0":
+                    # Runs of the defective runner: workspaces were re-prepared, safety recorded first.
+                    safety = [json.loads(l) for l in (DATA / arm / "safety.jsonl").read_text().splitlines()]
+                    modified = next(r["modified"] for r in safety if r["project"] == e.name)
+                else:
+                    ws = Path(workspaces[(arm, e.name)]["workspace"])
+                    modified = tree_hash(ws, e) != workspaces[(arm, e.name)]["hash_before"]
                 fh.write(json.dumps({**base, "kind": "run", "parsed": reply is not None, "modified": modified}) + "\n")
                 if reply is None:
                     continue

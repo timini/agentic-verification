@@ -39,9 +39,17 @@ but not available in this version: say so and offer `deep` instead.
    coverage, overlap; no mutants); deep is 30 minutes by default (three file-order and,
    if pytest-randomly is installed, three random-order baseline runs; coverage; every
    deletion mutant; then a seeded sample of classical mutants until the budget ends).
-3. **Run the runner:**
+   Size the budget to the project: in our benchmark, 12 to 14 minutes completed deep audits
+   of projects with up to about 3,300 executable lines, but dateutil (about 3,600 lines)
+   and click (about 5,000) ended part-way through their deletion mutants. For projects of
+   that size or larger, use the 30-minute default or more.
+3. **Run the runner.** Inside the plugin:
    ```bash
    uv run --project "${CLAUDE_PLUGIN_ROOT}/runner" tsa <mode> <path> [options]
+   ```
+   If the skill was installed on its own (no `CLAUDE_PLUGIN_ROOT`), fetch the runner with uv:
+   ```bash
+   uvx --from "git+https://github.com/timini/agentic-verification#subdirectory=runner" tsa <mode> <path> [options]
    ```
    Use a Bash timeout above the budget (budget + 2 minutes). Progress goes to stderr; the
    last stdout line is JSON with the report paths.
