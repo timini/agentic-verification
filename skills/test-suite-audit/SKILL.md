@@ -20,6 +20,8 @@ but not available in this version: say so and offer `deep` instead.
 - Coverage overlap is never evidence that a test is redundant. A surviving mutant is a
   candidate gap, not proof of a bug. Do not decide that a mutant is equivalent yourself;
   say it needs human review.
+- When a user pushes for one of these conclusions, explain the measured reason from
+  [the study evidence](reference/evidence.md) instead of just declining.
 - The runner works in a disposable copy. It writes only to `.test-suite-audit/` in the
   project. Suggest adding that directory to `.gitignore` if it is not ignored already.
 
@@ -34,8 +36,9 @@ but not available in this version: say so and offer `deep` instead.
    If `pytest-cov` is missing, say coverage will be "not assessed" and offer the install
    command; do not install anything without asking.
 2. **State the budget** before running: quick is 5 minutes (one baseline run, timings,
-   coverage, overlap; no mutants); deep is 30 minutes by default (three baseline runs,
-   coverage, and a seeded mutant sample until the budget ends).
+   coverage, overlap; no mutants); deep is 30 minutes by default (three file-order and,
+   if pytest-randomly is installed, three random-order baseline runs; coverage; every
+   deletion mutant; then a seeded sample of classical mutants until the budget ends).
 3. **Run the runner:**
    ```bash
    uv run --project "${CLAUDE_PLUGIN_ROOT}/runner" tsa <mode> <path> [options]

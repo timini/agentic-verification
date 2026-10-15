@@ -53,8 +53,11 @@ def markdown(st: AuditState) -> str:
         out += [f"Median wall time {t['median_wall_s']:.1f}s from {t['samples']} run(s). The sum of individual test "
                 f"durations ({t['sum_of_test_durations_s']:.1f}s) is not wall time and is shown only for comparison.", ""]
     if st.flakiness:
-        out += ["## Flakiness", "", f"{len(st.flakiness['intermittent'])} tests varied in {st.flakiness['runs']} runs. "
-                + st.flakiness["note"], ""]
+        fl = st.flakiness
+        out += ["## Flakiness", "",
+                f"{fl['file_order_runs']} file-order and {fl['random_order_runs']} random-order runs. "
+                f"{len(fl['intermittent'])} tests varied between file-order runs; "
+                f"{len(fl['order_dependent'])} passed every file-order run but failed in random order. " + fl["note"], ""]
     c = st.coverage
     if c:
         out += ["## Coverage and overlap", "",
@@ -72,8 +75,11 @@ def markdown(st: AuditState) -> str:
             rate = "n/a" if d["rate"] is None else f"{100 * d['rate']:.1f}%"
             excl = ", ".join(f"{k} {v}" for k, v in d["excluded"].items()) or "none"
             out.append(f"| {d['population']} | {d['killed']} | {d['survived']} | {d['uncovered']} | {rate} | {excl} |")
-        out += ["", f"{st.mutation['run']} mutants run, {st.mutation['not_run']} sampled but not run. "
-                "Patches are in `mutants/`.", ""]
+        m = st.mutation
+        done = "all" if m["deletion_complete"] else "not all"
+        out += ["", f"Deletion mutants run first and in full ({done} {m['eligible']['deletion']} ran); classical mutants "
+                f"are a seeded sample filling the rest of the budget ({m['classical_sampled']} of "
+                f"{m['eligible']['classical']}). Patches are in `mutants/`.", ""]
     if st.not_assessed:
         out += ["## Not assessed", "", *[f"- {k}: {v}" for k, v in st.not_assessed.items()], ""]
     out += ["## Labels", "", "*Measured*: observed in this run. *Inferred*: derived from measurements, needs review. "

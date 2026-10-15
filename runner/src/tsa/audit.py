@@ -120,6 +120,33 @@ def _inventory(st: AuditState, ws) -> None:
         st.inventory["error"] = r.output_tail[-1500:]
 
 
+RANDOM_ORDER_RUNS = 3
+
+
+def _random_order_project(ws):
+    """The workspace project with pytest-randomly enabled, or None if it is not installed.
+
+    Same-order reruns cannot reveal order dependence, which was the only kind of
+    intermittency observed in our study (H6), so deep mode varies order when it can.
+    """
+    import subprocess
+    from dataclasses import replace
+
+    probe = subprocess.run([str(ws.python), "-c", "import pytest_randomly"], capture_output=True)
+    if probe.returncode != 0:
+        return None
+    args, skip = [], False
+    for i, a in enumerate(ws.pytest_args):
+        if skip:
+            skip = False
+            continue
+        if a == "-p" and i + 1 < len(ws.pytest_args) and ws.pytest_args[i + 1] == "no:randomly":
+            skip = True
+            continue
+        args.append(a)
+    return replace(ws, pytest_args=tuple(args))
+
+
 def _baseline(st: AuditState, ws) -> None:
     runs = 1 if st.mode == "quick" else 3
     outcomes, walls, overheads, durs = [], [], [], defaultdict(list)
@@ -158,10 +185,26 @@ def _baseline(st: AuditState, ws) -> None:
             key=lambda x: -x["median_setup_s"])[:10],
     }
     if runs > 1:
-        n = len(outcomes)
-        st.flakiness = {"runs": n, "intermittent": varying,
+        random_outcomes = []
+        rand = _random_order_project(ws)
+        if rand is None:
+            st.not_assessed["order dependence"] = "pytest-randomly is not installed in the target environment"
+        else:
+            for seed in range(1, RANDOM_ORDER_RUNS + 1):
+                if st.budget.exhausted():
+                    break
+                r = run_pytest(rand, extra_args=(f"--randomly-seed={seed}",), timeout_s=st.budget.remaining())
+                random_outcomes.append({k: v.outcome for k, v in r.outcomes.items()})
+        # Passed every file-order run but failed at least once in random order.
+        order_dependent = sorted(
+            t for t in stable
+            if any(o.get(t) in ("failed", "error") for o in random_outcomes)
+        )
+        n = len(outcomes) + len(random_outcomes)
+        st.flakiness = {"runs": n, "file_order_runs": len(outcomes), "random_order_runs": len(random_outcomes),
+                        "intermittent": varying, "order_dependent": order_dependent,
                         "note": f"No failure in {n} runs gives an approximate 95% upper bound of {min(1.0, 3 / n):.0%} "
-                                "on a test's failure rate (independent-run approximation)."}
+                                "on a test's failure rate (independent-run approximation). Not observed is not stable."}
 
 
 def _coverage(st: AuditState, ws) -> None:
@@ -237,13 +280,12 @@ def _mutation(st: AuditState, ws, max_mutants: int | None, progress) -> None:
     rng.shuffle(fns)
     cls = [m for m in muts if m.population == "classical"]
     rng.shuffle(cls)
-    order: list[Mutant] = []
-    ci = 0
-    for key in fns:
-        order += by_fn[key]
-        order += cls[ci : ci + len(by_fn[key])]
-        ci += len(by_fn[key])
-    order += cls[ci:]
+    # The deletion population is small and runs in full first; classical mutants are a sample
+    # that fills the remaining budget. Our study found deletion is not the cheaper way to find
+    # survivors (H2), but it is the direct way to find unchecked effects (H3), and complete
+    # replacement sets are what the pseudo-tested label needs.
+    order: list[Mutant] = [m for key in fns for m in by_fn[key]] + cls
+    n_deletion = sum(len(v) for v in by_fn.values())
     if max_mutants:
         order = order[:max_mutants]
 
@@ -266,14 +308,18 @@ def _mutation(st: AuditState, ws, max_mutants: int | None, progress) -> None:
     for m, r in results:
         original = (ws.root / m.file).read_text()
         (patches / f"{m.id}.patch").write_text(m.patch(original))
+    deletion_run = sum(1 for m, _ in results if m.population == "deletion")
     st.mutation.update({
-        "eligible": {"classical": len(cls), "deletion": sum(len(v) for v in by_fn.values())},
+        "eligible": {"classical": len(cls), "deletion": n_deletion},
         "run": len(results), "not_run": len(order) - len(results),
+        "deletion_complete": deletion_run == n_deletion,
+        "classical_sampled": sum(1 for m, _ in results if m.population == "classical"),
         "results": [{**m.record(), **r.record()} for m, r in results],
     })
-    if len(results) < len(order):
+    if deletion_run < n_deletion:
         st.status = "partial"
-        st.mutation["note"] = "budget ended before every sampled mutant ran; unrun mutants are 'not run'"
+        st.mutation["note"] = (f"budget ended after {deletion_run} of {n_deletion} deletion mutants; "
+                               "pseudo-tested labels cover only functions whose replacements all ran")
 
 
 def _count(it):
@@ -315,6 +361,16 @@ def _derive_findings(st: AuditState) -> None:
                          "Investigate shared state, time, randomness and ordering. Same-order reruns do not reveal "
                          "order dependence; rerun with a random-order plugin to check it.",
                          evidence=b["varying"][:20]))
+    od = st.flakiness.get("order_dependent") if st.flakiness else None
+    if od:
+        F.append(Finding("order-dependent", "flakiness",
+                         f"{len(od)} tests fail only when the test order changes", "measured", 84,
+                         f"Each passed all {st.flakiness['file_order_runs']} file-order runs and failed in at least one of "
+                         f"{st.flakiness['random_order_runs']} random-order runs (pytest-randomly seeds 1 to "
+                         f"{st.flakiness['random_order_runs']}). Same-order reruns would not show this.",
+                         "Look for state shared between tests: module-level caches, globals, warning filters, "
+                         "fixtures with a wide scope.",
+                         evidence=od[:20], reproduce="python -m pytest -p randomly --randomly-seed=<seed>"))
     if b.get("unstable_ids"):
         F.append(Finding("unstable-ids", "baseline", f"{len(b['unstable_ids'])} test IDs change between runs",
                          "measured", 50, "These node IDs appeared in some baseline runs and not others, typically "

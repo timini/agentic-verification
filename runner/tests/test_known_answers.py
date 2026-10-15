@@ -31,8 +31,9 @@ def project(tmp_path_factory):
     if not venv.exists():
         subprocess.run(["uv", "venv", "-q", "-p", "3.12", str(venv)], check=True)
         subprocess.run(["uv", "pip", "install", "-q", "-p", str(venv / "bin/python"), "-e", str(FIXTURE),
-                        "pytest", "pytest-cov"], check=True)
-    proj = Project(root=FIXTURE, python=venv / "bin/python", source=("src/known",), tests=("tests",))
+                        "pytest", "pytest-cov", "pytest-randomly"], check=True)
+    proj = Project(root=FIXTURE, python=venv / "bin/python", source=("src/known",), tests=("tests",),
+                   pytest_args=("-p", "no:cacheprovider", "-p", "no:randomly"))
     ws = proj.copy_to(tmp_path_factory.mktemp("ws") / "proj")
     return proj, ws
 
@@ -117,8 +118,26 @@ def test_quick_audit_end_to_end(project, tmp_path):
     st = run_audit(AuditConfig(proj), "quick", budget_minutes=3, max_mutants=None, out_root=tmp_path,
                    progress=lambda m: None)
     assert st.status == "complete"
-    assert st.baseline["stable_pass"] == 6
+    assert st.baseline["stable_pass"] == 8
     assert "mutation" in st.not_assessed and not st.mutation
+
+
+def test_deep_audit_finds_order_dependence_and_runs_deletion_first(project, tmp_path):
+    from tsa.audit import run_audit
+    from tsa.config import AuditConfig
+
+    proj, _ = project
+    st = run_audit(AuditConfig(proj), "deep", budget_minutes=5, max_mutants=None, out_root=tmp_path,
+                   progress=lambda m: None)
+    assert st.flakiness["random_order_runs"] == 3
+    assert st.flakiness["order_dependent"] == ["tests/test_order.py::test_second_needs_first"]
+    assert any(f.id == "order-dependent" for f in st.findings)
+    assert st.mutation["deletion_complete"]
+    # Deletion mutants are scheduled first: capping the run at their count leaves no classical ones.
+    n_del = st.mutation["eligible"]["deletion"]
+    capped = run_audit(AuditConfig(proj), "deep", budget_minutes=5, max_mutants=n_del,
+                       out_root=tmp_path / "capped", progress=lambda m: None)
+    assert {r["population"] for r in capped.mutation["results"]} == {"deletion"}
 
 
 def test_original_tree_unchanged(project, evidence):
