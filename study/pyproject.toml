@@ -1,0 +1,18 @@
+[project]
+name = "tsa-study"
+version = "0.1.0"
+description = "Empirical study for the Test Suite Auditor design. Research evidence only; not shipped with the plugin."
+requires-python = ">=3.12"
+dependencies = [
+    "tsa",
+    "pandas>=2.2",
+    "matplotlib>=3.9",
+    "scipy>=1.14",
+    "numpy>=2.1",
+]
+
+[tool.uv.sources]
+tsa = { path = "../runner", editable = true }
+
+[tool.uv]
+package = false

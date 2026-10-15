@@ -83,4 +83,15 @@ Raw observations are append-only JSONL under `study/data/raw`. All tables, figur
 
 ## Deviations
 
-None yet.
+All of the following were decided on 15 October 2026, before any mutant, coverage, overlap or flakiness data was collected. Only E0 baseline and H5 timing runs existed at that point.
+
+1. **Kill sets in H1 and H4.** "Each test is run individually" is implemented as one pytest session per mutant that runs every selected test without stopping at the first failure, recording each test's outcome. Kill sets are complete; tests in the same session could in principle affect each other through shared state.
+2. **Activation check.** Activation uses `sys.monitoring` line events on the first line of the mutated region instead of a sentinel inserted into the mutant. The mutant source is not altered.
+3. **H3 sampling.** Call-statement deletions are sampled from *all* eligible functions (cap 300 per project), not only from fully killed ones, because the primary metric's denominator is all statement-deletion survivors. Each deletion records its parent function's status.
+4. **Harness setup errors in E0.** The first baseline attempt for attrs, dateutil, marshmallow and tomlkit failed before any test ran: test dependencies live in dependency groups that `.[tests]` did not install, tomlkit needs a git submodule, and dateutil's warnings-as-errors filter rejects a pytest 9 deprecation. Those failed records were deleted (an exception to the append-only rule) and the projects were re-run after fixing `corpus.toml`. No project was excluded.
+5. **Unstable test IDs.** marshmallow parametrizes six tests with the current time, so their node IDs differ on every run. All their outcomes passed. They are counted as varying and excluded from scope; this is not flakiness and does not trigger the project exclusion rule.
+
+The following was found after data collection, on 15 October 2026.
+
+6. **Test files in toolz's mutant population.** toolz keeps its tests inside the package (`toolz/tests`), and the source path `toolz` included them, so H2 and H3 mutated test code: 9,585 classical and 239 deletion mutants in H2, and 239 body and call mutants in H3. H1 and H4 drew mutants from lines covered in the run phase and contained none. Every affected toolz run was exhaustive (no budget or sampling cap was reached), and each mutant runs independently, so the analysis drops these mutants, which is equivalent to never generating them. The runner now excludes test files from mutation.
+
