@@ -17,5 +17,9 @@
     "flaky-tests",
     "test-quality",
     "verification"
-  ]
+  ],
+  "homepage": "https://github.com/timini/agentic-verification",
+  "documentationUrl": "https://github.com/timini/agentic-verification#readme",
+  "supportUrl": "https://github.com/timini/agentic-verification/issues",
+  "privacyPolicyUrl": "https://github.com/timini/agentic-verification/blob/main/PRIVACY.md"
 }
