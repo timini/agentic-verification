@@ -1,6 +1,6 @@
 # Product requirements: Test Suite Auditor
 
-Version 0.2 · 15 October 2026 · Status: proposed, research complete; implementation not started
+Version 0.3 · 15 October 2026 · Status: audit MVP implemented (`runner/`, `skills/`); requirements checked against our own study (section 11)
 
 ## 1. Product intent
 
@@ -54,7 +54,7 @@ Example (illustrative, not measured): “Three parser tests share most covered b
 
 ### F1. Inventory and establish a trustworthy baseline
 
-Record repository commit and working-tree fingerprint, runner/plugin versions, dependency lock hash, configuration, test IDs including parameter cases, environment, seed, worker count, and selected scope. Inventory skipped, expected-failure, uncollected, and unsupported tests separately.
+Report tests whose node IDs change between runs (for example, parametrized with the current time) as a separate finding; their results cannot be compared across runs. Record repository commit and working-tree fingerprint, runner/plugin versions, dependency lock hash, configuration, test IDs including parameter cases, environment, seed, worker count, and selected scope. Inventory skipped, expected-failure, uncollected, and unsupported tests separately.
 
 Execute a pristine baseline in an isolated workspace. Pre-existing failures or unstable baseline outcomes block confident mutation and pruning conclusions for affected scope. Record a partial report and actionable baseline failures instead. Never reset or clean the user's checkout to obtain a baseline.
 
@@ -66,7 +66,7 @@ Quick mode may use one run and label it accordingly. Repeated measurements repor
 
 ### F3. Assess flakiness
 
-Use configured CI history where available and repeated executions at a fixed revision. Separate same-order repetition from deliberate order/seed/worker changes. A passing and failing result under nominally identical conditions is an observed intermittent outcome; it does not by itself identify its cause.
+Use configured CI history where available and repeated executions at a fixed revision. Separate same-order repetition from deliberate order/seed/worker changes. Include order variation by default when a random-order plugin is available: in our study the only intermittent tests were order-dependent and same-order reruns never showed one of them failing (H6). A passing and failing result under nominally identical conditions is an observed intermittent outcome; it does not by itself identify its cause.
 
 Show failures/attempts, environment grouping, and uncertainty. Zero failures in a small sample is “not observed,” not “stable.” As a rough independent-trial approximation, zero failures in n runs gives a 95% upper failure-rate bound of about 3/n; correlated CI runs violate that assumption. Do not count retry success as an original pass.
 
@@ -114,7 +114,7 @@ Confirm important survivors with broader tests and a witness showing loss of req
 
 Use module → function → side-effect experiments for prioritization, not as a monotonic search. A killed whole-function mutant can conceal an undetected missing effect. Sample fine-grained interventions beneath both killed and surviving parents, each against the pristine baseline. Store composite module interventions separately from single-effect mutations and never infer child outcomes from a parent result.
 
-Report attempted/activated targets, replacement sets, status counts, detection mechanisms, confirmed gaps, and cost. Keep these results separate from classical and test-aware semantic scores. Evaluate deterministic deletion and LLM-directed ablation against equal-budget classical runs; measure unique reviewed gaps, incidental crashes, invalid proposals, and reviewer effort. No automatic code removal follows from a surviving ablation.
+Report attempted/activated targets, replacement sets, status counts, detection mechanisms, confirmed gaps, and cost. Keep these results separate from classical and test-aware semantic scores. Do not present deterministic deletion as a cheaper substitute for classical mutation: under equal budgets it yielded 0.38 times as many survivors per CPU-minute (H2). Its population is small enough to run in full, which is what makes complete replacement-set labels possible. Evaluate deterministic deletion and LLM-directed ablation against equal-budget classical runs; measure unique reviewed gaps, incidental crashes, invalid proposals, and reviewer effort. No automatic code removal follows from a surviving ablation.
 
 ### F7. Perform controlled test-suite ablation
 
@@ -227,3 +227,17 @@ The central risk is optimizing against an incomplete oracle. Controls include pr
 Initial decisions: Python first; a skill plus runner; existing classical engines; report-only default; separate semantic experiments; no universal score threshold. Open decisions after the spike: exact supported dependency versions, packaging/distribution, historical CI adapters, retention-policy defaults, and whether measured semantic yield merits its cost.
 
 The product promise is practical and limited: make the evidence behind test-suite maintenance visible, repeatable, and cheaper to obtain.
+
+## 11. Evidence from our study
+
+We tested the design rules above on eight Python projects before relying on them. The paper is [study/paper/test-suite-auditor-study.pdf](../study/paper/test-suite-auditor-study.pdf); hypotheses and deviations are in [study/PREREGISTRATION.md](../study/PREREGISTRATION.md).
+
+| Rule | Study result | Effect on this PRD |
+| --- | --- | --- |
+| Overlap is not redundancy (F4) | 35% of pairs with coverage Jaccard >= 0.9 are complementary (95% CI 22-48%) | Confirmed; overlap stays an "investigate" signal |
+| Killed parent does not protect children (F6a) | 71% of unnoticed call deletions sit in functions whose every body replacement was killed (58-80%) | Confirmed; sample fine-grained deletions under killed functions |
+| Group removal needs group validation (F7) | Removing all leave-one-out-redundant tests lost kills in 16 of 16 files | Confirmed |
+| Profile without coverage (F2) | Per-test contexts slow suites 2.48x pooled (1.74-3.88); up to 9.5x | Confirmed |
+| Flakiness needs more than reruns (F3) | Only 2 intermittent tests in 480 suite runs, both order-dependent | Order variation added to F3 |
+| Deletion as an economical first pass (F6a) | Not supported: 0.38x the survivors per CPU-minute of classical mutation (0.24-0.48) | Deletion kept for completeness and H3, not for cost |
+

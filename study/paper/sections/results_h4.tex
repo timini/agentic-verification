@@ -1,0 +1,11 @@
+\subsection{H4: individually removable is not jointly removable}
+
+\HFourUnits{} test files met the size rule. more-itertools and dateutil contributed none. more-itertools keeps its tests in two files of 145 and 620 tests. dateutil's only file in range, \texttt{test\_imports.py}, has 27 tests, but only 8 of them record run-phase coverage, which leaves it below the 10-test minimum. tomlkit had one eligible file.
+
+In every file, at least two tests were leave-one-out redundant, so all \HFourEligible{} files were evaluated. Removing the whole leave-one-out-redundant set together lost at least one kill in \HFourLosing{} of \HFourEligible{} files (\HFourShare{}, Wilson 95\% CI \HFourLo{} to \HFourHi{}). H4 is \textbf{\HFourSupported}. Across those files, group removal lost \HFourLostTotal{} of \HFourKilledTotal{} kills (Table~\ref{tab:h4}).
+
+The extreme case is attrs' \texttt{test\_filters.py}: every one of its 33 tests is individually redundant, because every mutant it kills is killed by at least two tests, yet removing them all loses all 21 kills. Leave-one-out redundancy is a statement about one test given all the others, so it cannot be applied to several tests at once. This is the textbook result for set cover; the data shows it is not a corner case on real suites.
+
+The greedy cover column shows how small a subset would preserve every observed kill: a median of \HFourCoverMedian{} of the file's tests (range \HFourCoverMin{} to \HFourCoverMax{}). That number is fitted to this mutant sample. It should be read as an upper bound on what a fast-feedback tier could drop, to be checked on independent mutants and historical bugs, not as a deletion list.
+
+\input{generated/h4}

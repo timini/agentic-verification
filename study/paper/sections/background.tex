@@ -1,0 +1,13 @@
+\section{Background}
+
+\paragraph{Coverage and effectiveness.} Line coverage measures what a test executes, not what it checks. \citet{inozemtseva2014coverage} found that coverage is not strongly correlated with suite effectiveness once suite size is controlled. Mutation analysis is the usual proxy for fault detection: a mutant is a small, deliberate change, and a suite ``kills'' it if some test fails. \citet{just2014mutants} showed mutant detection correlates with real-fault detection, while \citet{papadakis2019advances} survey the many threats to interpreting mutation scores, including equivalent mutants and sampling.
+
+\paragraph{Pseudo-tested code.} \citet{niedermayr2016pseudo} introduced pseudo-tested methods: methods whose whole body can be removed without any test failing although tests execute them. Descartes implements this ``extreme mutation'' for Java on top of PIT~\cite{vera2018descartes}, and \citet{vera2019pseudo} studied pseudo-tested methods across a set of open-source Java projects. \citet{deng2013deletion} evaluated statement deletion as an economical mutation operator. \citet{maton2024pseudo} applied extreme mutation at statement level to 27 Java projects and reported that 48\% of pseudo-tested statements lie outside pseudo-tested methods. If that holds for Python, a killed whole-function mutant says little about the function's individual effects.
+
+\paragraph{Test-suite reduction.} Reduction techniques remove tests while preserving a requirement such as coverage. \citet{shi2014reduction} showed that coverage-preserving reduction can lose fault-detection ability, measured with mutants. The audit avoids automatic reduction, but it must still decide what evidence a ``candidate removal'' needs.
+
+\paragraph{Flakiness.} \citet{luo2014flaky} categorised the root causes of flaky tests, and \citet{gruber2021flaky} studied them in Python, finding order dependence to be a major category. Both show that intermittent failures can be rare per run, which bounds what a small number of reruns can show.
+
+\paragraph{Mutation at scale.} \citet{petrovic2018google} describe diff-based, filtered mutation analysis at Google, where cost and reviewer attention, not raw mutation scores, decide what is useful. This motivates the cost-per-finding framing of H2.
+
+\paragraph{Tools.} We use coverage.py dynamic contexts~\cite{coveragepy} through pytest-cov to attribute lines to tests, and the operator generator of mutmut 3.8.0~\cite{mutmut} for classical mutants.

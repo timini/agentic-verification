@@ -1,0 +1,27 @@
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+Project & Test file & Tests & Killed & LOO-redundant & Lost by group & Greedy cover & No kills \\
+\midrule
+attrs & test\_annotations.py & 47 & 31 & 44 & 11 & 6 & 0 \\
+attrs & test\_filters.py & 33 & 21 & 33 & 21 & 4 & 0 \\
+attrs & test\_funcs.py & 53 & 41 & 48 & 8 & 11 & 4 \\
+toolz & toolz/test\_inspect\_args.py & 17 & 92 & 9 & 4 & 9 & 0 \\
+toolz & toolz/test\_dicttoolz.py & 51 & 139 & 48 & 81 & 14 & 0 \\
+toolz & toolz/test\_itertoolz.py & 51 & 138 & 18 & 3 & 34 & 1 \\
+marshmallow & test\_utils.py & 20 & 45 & 13 & 1 & 8 & 5 \\
+marshmallow & test\_options.py & 10 & 45 & 6 & 1 & 5 & 0 \\
+marshmallow & test\_decorators.py & 44 & 84 & 41 & 41 & 8 & 0 \\
+click & test\_info\_dict.py & 28 & 90 & 21 & 18 & 9 & 0 \\
+click & test\_stream\_lifecycle.py & 23 & 82 & 19 & 2 & 5 & 4 \\
+click & test\_testing.py & 43 & 89 & 35 & 8 & 11 & 3 \\
+tomlkit & test\_parser.py & 34 & 80 & 28 & 12 & 8 & 0 \\
+cachetools & test\_func.py & 36 & 112 & 24 & 6 & 15 & 0 \\
+cachetools & test\_tlru.py & 34 & 126 & 25 & 7 & 13 & 0 \\
+cachetools & test\_cache.py & 23 & 66 & 19 & 9 & 7 & 0 \\
+\bottomrule
+\end{tabular}
+\caption{H4: kill matrices for sampled test files. \emph{LOO-redundant}: tests whose removal alone loses no kill. \emph{Lost by group}: kills lost when all of them are removed together. \emph{Greedy cover}: tests a greedy set cover keeps.}
+\label{tab:h4}
+\end{table}

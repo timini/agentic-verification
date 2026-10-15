@@ -1,0 +1,33 @@
+\section{Results}
+\label{sec:results}
+
+\subsection{H1: coverage overlap and redundancy}
+
+Every project had pairs above the 0.9 threshold, so each contributed 50 sampled pairs (\HOnePairs{} in total). Among them, \HOneShare{} were mutually non-dominated: each test killed at least one mutant the other did not (95\% CI \HOneLo{} to \HOneHi{}, clustered by project). H1 is \textbf{\HOneSupported}. A further \HOneOneWay{} of pairs were one-way: one test's kill set strictly contained the other's, so only one of the two tests could be removed without losing kills, and the coverage score does not say which. Only the remaining pairs had identical kill sets. Overall, \HOneAnyDiff{} of high-overlap pairs differed in what they detect.
+
+The share varied widely between projects (Table~\ref{tab:h1}), from \HOneMinShare{} in \HOneMinProject{} to \HOneMaxShare{} in \HOneMaxProject{}. Pairs of parametrized cases of the same test function were non-dominated less often (\HOneSameFnShare{} of \HOneSameFnN{}) than pairs of distinct functions (\HOneDistinctFnShare{} of \HOneDistinctFnN{}), but both are far from zero.
+
+Across both strata, coverage Jaccard and kill-set Jaccard are correlated (Spearman $\rho = \HOneRho$, $n = \HOneRhoN$ pairs with at least one kill; Figure~\ref{fig:h1}). Overlap is therefore a reasonable signal for \emph{where to look}, which is how the audit uses it, but at the top of the scale it does not reliably separate redundant pairs from complementary ones.
+
+\input{generated/h1}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.6\linewidth]{figures/h1_scatter.pdf}
+\caption{H1: coverage Jaccard against kill-set Jaccard for sampled pairs with at least one kill.}
+\label{fig:h1}
+\end{figure}
+
+\input{sections/results_h2}
+\input{sections/results_h3}
+\input{sections/results_h4}
+
+\subsection{H5: overhead of per-test coverage contexts}
+
+Per-test contexts made suites slower by a pooled factor of \HFiveRatio{} (95\% CI \HFiveLo{} to \HFiveHi{}), so H5 is \textbf{\HFiveSupported}. The range is wide (Table~\ref{tab:h5}): \HFiveMin{} for cachetools, where four threading tests that each sleep for one second account for most of the suite's time, and \HFiveMax{} for \HFiveMaxProject{}. Most of the cost comes from coverage measurement itself. Adding contexts on top of plain coverage costs a pooled factor of \HFiveCtxCov{}, with click the clear exception. Click has 2,016 tests with a median duration of 0.2\,ms, so a fixed cost per context switch is a large fraction of each test; we did not measure that cost directly. For more-itertools, plain coverage alone is about nine times slower than an uninstrumented run. One test, \texttt{test\_primes}, takes 4.4\,s of the 8.3\,s uninstrumented suite and calls \texttt{is\_prime} and \texttt{nth\_prime} for every prime below 100,000: many short pure-Python calls, each of which the tracer has to follow.
+
+The practical consequence for the audit is that timings must come from uninstrumented runs, and any time estimate derived from a coverage run must be labelled as such.
+
+\input{generated/h5}
+
+\input{sections/results_h6}

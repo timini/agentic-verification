@@ -1,0 +1,39 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{url}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+
+\input{generated/macros}
+
+\title{Coverage Overlap, Deleted Behaviour and Redundant Tests:\\
+An Empirical Check of Test-Suite Audit Heuristics on Eight Python Projects}
+\author{Tim Richardson\\\small\url{https://github.com/timini/test-suite-auditor}}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\input{sections/abstract}
+\input{sections/introduction}
+\input{sections/background}
+\input{sections/method}
+\input{sections/results}
+\input{sections/threats}
+\input{sections/implications}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\appendix
+\input{sections/reproducibility}
+
+\end{document}

@@ -1,0 +1,14 @@
+\section{Implications for the Test Suite Auditor}
+\label{sec:implications}
+
+Each result maps to a requirement in the product specification~\cite{tsaprd}.
+
+\begin{description}
+  \item[Overlap is a lead, not a verdict (PRD F4; H1).] Supported. High-overlap pairs are worth investigating, since overlap correlates with kill-set similarity, but a third of them are complementary. The audit reports overlap only as an \emph{inferred} ``investigate'' finding and never as a removal candidate.
+  \item[Fine-grained ablation under killed parents (PRD F6a; H3).] Supported, strongly. Most unchecked calls sit inside functions whose whole-body mutants are all killed. The audit must sample call and statement deletions beneath killed functions as well as surviving ones, and must never infer a child result from a parent kill. Deterministic call deletion finds these directly and its population is small enough to run in full; it stays in the MVP.
+  \item[Group validation of removals (PRD F7; H4).] Supported, strongly. Every evaluated file lost kills when its leave-one-out-redundant tests were removed together. Leave-one-out results alone cannot authorise combined removal, and greedy covers fitted to one mutant sample need a holdout check before they are shown as more than an upper bound.
+  \item[Profile without coverage (PRD F2; H5).] Supported. Coverage, and contexts on top of it, change run time by large and project-specific factors. Timings come from uninstrumented runs; coverage runs are labelled as such.
+  \item[Vary order when looking for flakiness (PRD F3; H6).] The only intermittent tests we found were order-dependent: same-order repetition shows one as a consistent failure and never shows the other failing. The audit's repeat runs should include order variation by default where a random-order plugin is available, and report ``not observed in $n$ runs'' with its bound.
+  \item[Stable test identifiers (PRD F1).] Not a hypothesis, but a finding of the baseline step: marshmallow parametrizes tests with the current time, so their IDs change on every run and they cannot be tracked across runs. The audit now reports such tests as a separate finding.
+\input{sections/implications_h2}
+\end{description}

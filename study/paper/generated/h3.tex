@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrrrrr}
+\toprule
+Project & Call deletions & Valid & Survived & In fully killed fn & Share \\
+\midrule
+attrs & 160 & 107 & 8 & 2 & 0.25 \\
+more-itertools & 110 & 100 & 4 & 2 & 0.50 \\
+dateutil & 183 & 142 & 19 & 11 & 0.58 \\
+toolz & 33 & 32 & 2 & 2 & 1.00 \\
+marshmallow & 94 & 77 & 9 & 8 & 0.89 \\
+click & 300 & 252 & 37 & 31 & 0.84 \\
+tomlkit & 257 & 233 & 48 & 34 & 0.71 \\
+cachetools & 114 & 98 & 13 & 10 & 0.77 \\
+\bottomrule
+\end{tabular}
+\caption{H3: sampled call-statement deletions. \emph{In fully killed fn}: survivors whose enclosing function had every body replacement killed.}
+\label{tab:h3}
+\end{table}

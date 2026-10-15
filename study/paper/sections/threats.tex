@@ -1,0 +1,18 @@
+\section{Threats to validity}
+\label{sec:threats}
+
+\paragraph{Mutants as a proxy.} Every detection result is relative to our mutant populations. Mutants are a reasonable but imperfect stand-in for real faults~\cite{just2014mutants}. A pair of tests that are ``non-dominated'' on our mutants could still be equivalent on the faults that matter to a project, and the reverse. Equivalent mutants inflate survivor counts; we did not review survivors for equivalence except in the H2 sample.
+
+\paragraph{Invalid and unactivated mutants.} We count mutants that break import or collection as invalid, not killed. This is conservative for kill rates and removes some mutants from H1 and H4 kill sets entirely. The activation check uses the first line of the mutated region, so a mutant on a later part of a multi-line expression could be marked activated although that sub-expression never ran. Deletion mutants replace the first line, so this does not affect them.
+
+\paragraph{Test selection by coverage.} Mutants run only against tests whose run-phase coverage includes a mutated line. A test that detects a mutant only through import-time or fixture code would be missed, so some survivors may be killable by the wider suite. Tests that pass in one session but would fail alone, or the reverse, could also bias H1 and H4 kill sets, because each mutant's tests share one session.
+
+\paragraph{Sampling.} H1 and H4 sample pairs, files and mutants with a fixed seed. Projects with very large high-overlap populations (attrs, dateutil) contribute the same 50 pairs as small ones, by design. The H4 file-size rule excluded two projects entirely. Pooled intervals resample projects, but eight projects is a small number of clusters, so the intervals are approximate.
+
+\paragraph{Corpus.} Eight mature libraries are not representative of application code, which typically has more I/O, more mocking and more integration tests. Our results are likely to understate mock shielding and overstate unit-level determinism. We chose release commits, whose suites are expected to pass; the one exception (dateutil) was an environment effect of building from a git checkout.
+
+\paragraph{Platform.} All runs used one macOS arm64 machine. A Linux replication of H1, H3 and H5 is prepared as a GitHub Actions workflow (\texttt{.github/workflows/study-replication.yml}) but has not been run for this version of the paper. Timing results (H2, H5) are the most platform-sensitive.
+
+\paragraph{Analyst.} The study was designed, run and analysed by the plugin's author. The pre-registration, the append-only raw data and generated numbers limit, but do not remove, that bias. The H2 usefulness review is done by the same person.
+
+\paragraph{Deviations.} All deviations were decided before the affected data were collected and are listed in the pre-registration: complete kill sets come from one session per mutant rather than one process per test; activation uses runtime line monitoring instead of an inserted sentinel; H3 call deletions are sampled from all functions so that the primary metric has a valid denominator; four projects' first baseline attempts failed for harness reasons and were re-run. One defect was found after collection: toolz keeps its tests inside its package, so H2 and H3 also mutated toolz test files. Those runs were exhaustive and each mutant runs independently, so the analysis drops the test-file mutants, which is equivalent to never generating them; the H3 result does not change because both toolz survivors were in production code.

@@ -1,0 +1,45 @@
+\section{Method}
+\label{sec:method}
+
+\subsection{Corpus}
+
+We chose eight mature, pure-Python projects with pytest suites that run in minutes: attrs, more-itertools, python-dateutil, toolz, marshmallow, click, tomlkit and cachetools. They cover class generation, iterator utilities, parsing and time zones, functional utilities, schema validation, command-line handling, a stateful TOML document model, and caching. Each is pinned to the commit of its latest release tag as of 15 October 2026 (Table~\ref{tab:corpus}) and installed into its own virtual environment on CPython 3.12 with pinned test tooling (pytest 9.1.1, pytest-cov 7.1.0, coverage 7.16.2, pytest-randomly 3.16.0). Every run disables pytest-randomly except the random-order runs of H6, and projects that use Hypothesis run with a fixed seed.
+
+Three pristine baseline runs define the scope. A test is in scope only if it passed in all three. Tests that failed in every run (\NBaselineFailing{} in total, all in dateutil: its bundled time-zone archive is generated at release time and absent from a git checkout, and the resulting I/O warning becomes an error under the project's warnings-as-errors filter) or whose outcome or identifier varied (\NBaselineVarying{}, all in marshmallow, whose parameter IDs embed the current time) are excluded. No project met the pre-registered exclusion rule.
+
+\input{generated/corpus}
+
+\subsection{Instrument}
+
+All experiments use the runner that ships with the plugin. It executes pytest in the project's own interpreter with a small plugin that records each test's setup, call and teardown outcome and duration.
+
+\paragraph{Per-test coverage.} pytest-cov's \texttt{-{}-cov-context=test} labels each executed line with the test and phase that ran it. We use the \emph{run} phase as a test's coverage set $C(t)$; setup, teardown and import-time lines are kept separately. Coverage is measured once per project and stored as raw data.
+
+\paragraph{Mutant populations.} The \emph{classical} population is every mutant produced by mutmut 3.8.0's operator generator (arithmetic, comparison, constant, argument and string operators). We call that generator directly and run each mutant ourselves, because mutmut's runner stops at the first failing test, which would leave kill sets incomplete. The \emph{deletion} population is ours: whole-function body replacement with \texttt{return None} plus constants matching the return annotation (for example \texttt{0} and \texttt{1} for \texttt{int}, \texttt{[]} for \texttt{list}), and replacement of each single call statement with \texttt{pass}. Mutants are spliced line by line so every line keeps its number. Both populations use the same eligibility rule as mutmut: top-level functions and methods of top-level classes, undecorated except for \texttt{staticmethod} and \texttt{classmethod}, excluding async functions. Body replacement also skips generators and trivial bodies (\texttt{pass}, \texttt{...}, \texttt{raise NotImplementedError}).
+
+\paragraph{Execution and statuses.} Each mutant runs alone in a worker's private copy of the project, with the copy's source placed ahead of the editable install on the import path. Unless stated otherwise, the tests run are the in-scope tests whose coverage includes a mutated line. Statuses are:
+\emph{killed} (a test that passed in all baseline runs fails or errors),
+\emph{survived} (valid, activated, no killer),
+\emph{uncovered} (no in-scope test covers it; not run),
+\emph{not activated} (tests ran but the mutated line never executed),
+\emph{invalid} (compile or collection/import error),
+\emph{timeout} (over $10\times$ the expected duration plus 10\,s) and
+\emph{infrastructure failure}.
+
+\paragraph{Activation check.} A mutant that never executes cannot be detected, so counting it as a survivor would overstate test weakness. Our plugin registers a \texttt{sys.monitoring} line callback when it loads, before conftest files import production code, and records whether the first line of the mutated region ran. The mutant source is not changed. On a known-answer fixture this check correctly separates a mocked-out method (not activated) from an unasserted one (survived).
+
+\subsection{Hypotheses and analysis}
+
+The pre-registration gives full definitions. In summary:
+\begin{description}
+  \item[H1] Among test pairs with coverage Jaccard $\geq 0.9$ (union $\geq 5$ lines; up to 50 pairs per project), a non-trivial share are \emph{mutually non-dominated}: each kills a mutant the other misses. Up to 40 mutants on lines either test covers run against both tests, recording each outcome. A comparison stratum uses pairs with Jaccard in $[0.5, 0.9)$. Supported if the pooled share's lower 95\% bound exceeds 10\%.
+  \item[H2] Under equal 20-minute wall-clock budgets with 8 workers, deletion mutants yield more activated survivors per CPU-minute than classical mutants. Supported if the deletion/classical ratio exceeds 1 in a majority of projects and its pooled lower bound exceeds 1.
+  \item[H3] A non-trivial share of call-deletion survivors lie inside functions whose every body replacement was killed. All body mutants run first; then up to 300 sampled call deletions per project. Supported if the pooled lower bound exceeds 10\%.
+  \item[H4] In test files with 10 to 60 tests (up to 3 per project, up to 150 mutants each, full kill matrix), removing all leave-one-out-redundant tests together loses kills in more than 20\% of files (lower bound).
+  \item[H5] Per-test contexts slow suites by more than 20\% (pooled lower bound of the median ratio above 1.2), from 10 interleaved blocks of no coverage, plain coverage and contexts.
+  \item[H6] Descriptive: intermittent tests across 30 file-order and 30 random-order runs, and whether a 3-run check would have seen them.
+\end{description}
+
+Proportions within a project use Wilson intervals. Pooled shares and ratios use a percentile bootstrap with 10,000 resamples of whole projects, so a project with many pairs or mutants cannot dominate the interval by itself. H5 pools per-project median ratios with a geometric mean.
+
+All tables, figures and summary statistics in this paper are generated from the raw records by the analysis scripts. A few descriptive counts in the text, such as the number of runs in a design or a value read from a generated table, are written out.

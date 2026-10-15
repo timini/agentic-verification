@@ -1,0 +1,10 @@
+\subsection{H6: intermittent outcomes in repeated runs}
+
+Across \HSixRuns{} runs of each of the \HSixProjects{} suites (30 in file order, 30 in random order), \HSixIntermittent{} tests had both passing and failing outcomes, both in dateutil (Table~\ref{tab:h6detail}). No test in the other seven projects failed intermittently. For a test that never failed, \HSixRuns{} independent runs bound its per-run failure rate at about \HSixUpper{} (95\%); smaller rates cannot be excluded.
+
+Both dateutil tests check that \texttt{dateutil.zoneinfo} emits a \texttt{DeprecationWarning}. In our checkout the bundled time-zone archive is absent (it is generated for releases), and reading it emits an I/O \texttt{UserWarning}, which the project's warnings-as-errors filter turns into a failure. The two functions under test, \texttt{zoneinfo.gettz} and \texttt{zoneinfo.gettz\_db\_metadata}, share a module-level cache, so only whichever of the two tests runs first reads the archive and fails. In file order that is always \texttt{testZoneInfoDeprecated}, which therefore failed all 30 file-order runs and was already excluded by the baseline as a consistent failure. In random order the failure moved between the two tests. \texttt{testZoneInfoMetadataDeprecated} passed in every file-order run and failed in 15 of 30 random-order runs.
+
+So \HSixCaughtByThree{} of the \HSixIntermittent{} would have been flagged by a three-run check, and only as a consistent failure. The other is invisible to any number of same-order reruns: \HSixRandomOnly{} test failed only under random ordering. This is a small result, but it is the pattern that matters for the audit. Repeating a suite in the same order measures noise; it does not reveal order dependence, which \citet{gruber2021flaky} report as a leading cause of flakiness in Python. Mature libraries like these appear to have little run-to-run noise, so the audit's flake step should vary order deliberately and report ``not observed in $n$ runs'' with its bound, never ``stable''.
+
+\input{generated/h6}
+\IfFileExists{generated/h6_detail.tex}{\input{generated/h6_detail}}{}

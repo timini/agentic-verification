@@ -1,0 +1,11 @@
+\subsection{H3: killed functions with unchecked calls}
+
+We ran every body-replacement mutant of every eligible function (\HThreeFns{} functions), then \HThreeCalls{} sampled call-statement deletions. \HThreeFnsFullyKilled{} functions had every replacement killed; most of the rest could not be assessed because their body mutants were uncovered, not activated or invalid.
+
+Of the \HThreeSurvivors{} activated, valid call-deletion survivors, \HThreeShare{} lay inside a fully killed function (95\% CI \HThreeLo{} to \HThreeHi{}). H3 is \textbf{\HThreeSupported}. Viewed from the functions' side, \HThreeFKWithSurv{} of the \HThreeFKFns{} fully killed functions that had at least one valid sampled deletion contained a deletion no test noticed (Table~\ref{tab:h3}).
+
+The share is higher than the 48\% reported for Java~\cite{maton2024pseudo}. The two numbers are not directly comparable. We delete only call statements, not all statements, and our function-level population is restricted by the mutmut eligibility rule. Still, the direction is the same and stronger: in these Python projects, most of the effects that tests fail to check sit inside functions that whole-function mutation would report as well tested.
+
+A random sample of 40 survivors (seed 1) was dominated by four kinds of call: \texttt{super().\_\_init\_\_(...)} in exception classes, whose message and position attributes no test checks (six of the 40, all in tomlkit); output side effects such as \texttt{flush()} and progress-bar rendering in click; cleanup and invalidation such as \texttt{\_validation\_cache.clear()}, \texttt{\_reindex()} and a linked-list \texttt{unlink()} in a TTL cache; and \texttt{sort()} calls whose ordering effect no test observes. Whether each matters is a review question. The audit can only show that no test noticed, which is why it reports these as candidate gaps rather than defects.
+
+\input{generated/h3}
