@@ -1,0 +1,9 @@
+Project,Call deletions,Valid,Survived,In fully killed fn,Share
+attrs,160,107,8,2,0.25
+more-itertools,110,100,4,2,0.5
+dateutil,183,142,19,11,0.5789473684210527
+toolz,33,32,2,2,1.0
+marshmallow,94,77,9,8,0.8888888888888888
+click,300,252,37,31,0.8378378378378378
+tomlkit,257,233,48,34,0.7083333333333334
+cachetools,114,98,13,10,0.7692307692307693

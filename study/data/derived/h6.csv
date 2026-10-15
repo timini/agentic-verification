@@ -1,0 +1,9 @@
+Project,Runs,Tests seen,Intermittent
+attrs,60,1383,0
+more-itertools,60,765,0
+dateutil,60,2090,2
+toolz,60,188,0
+marshmallow,60,1306,0
+click,60,2016,0
+tomlkit,60,1051,0
+cachetools,60,338,0

@@ -1,0 +1,17 @@
+Project,Test file,Tests,Killed,LOO-redundant,Lost by group,Greedy cover,No kills
+attrs,test_annotations.py,47,31,44,11,6,0
+attrs,test_filters.py,33,21,33,21,4,0
+attrs,test_funcs.py,53,41,48,8,11,4
+toolz,toolz/test_inspect_args.py,17,92,9,4,9,0
+toolz,toolz/test_dicttoolz.py,51,139,48,81,14,0
+toolz,toolz/test_itertoolz.py,51,138,18,3,34,1
+marshmallow,test_utils.py,20,45,13,1,8,5
+marshmallow,test_options.py,10,45,6,1,5,0
+marshmallow,test_decorators.py,44,84,41,41,8,0
+click,test_info_dict.py,28,90,21,18,9,0
+click,test_stream_lifecycle.py,23,82,19,2,5,4
+click,test_testing.py,43,89,35,8,11,3
+tomlkit,test_parser.py,34,80,28,12,8,0
+cachetools,test_func.py,36,112,24,6,15,0
+cachetools,test_tlru.py,34,126,25,7,13,0
+cachetools,test_cache.py,23,66,19,9,7,0

@@ -1,0 +1,17 @@
+project,strategy,uncovered,invalid,killed,survived,timeout,not_activated
+attrs,classical,142,752.0,1550,300,13.0,1.0
+attrs,deletion,7,106.0,220,9,2.0,0.0
+more-itertools,classical,53,11.0,1614,201,141.0,0.0
+more-itertools,deletion,2,2.0,263,4,27.0,0.0
+dateutil,classical,312,70.0,1305,377,128.0,0.0
+dateutil,deletion,57,26.0,276,31,40.0,0.0
+toolz,classical,173,52.0,1108,161,7.0,0.0
+toolz,deletion,13,6.0,138,2,0.0,0.0
+marshmallow,classical,127,350.0,1998,318,1.0,0.0
+marshmallow,deletion,4,49.0,291,14,0.0,0.0
+click,classical,601,28.0,2093,462,50.0,0.0
+click,deletion,160,15.0,757,69,18.0,0.0
+tomlkit,classical,607,0.0,3131,566,45.0,0.0
+tomlkit,deletion,117,0.0,591,85,25.0,0.0
+cachetools,classical,109,20.0,1187,193,22.0,0.0
+cachetools,deletion,4,13.0,163,14,29.0,0.0

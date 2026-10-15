@@ -1,0 +1,9 @@
+Project,Pairs,Non-dominated,95% CI,One-way,Identical
+attrs,50,11 (22%),13--35%,21,18
+more-itertools,50,10 (20%),11--33%,21,19
+dateutil,50,27 (54%),40--67%,15,8
+toolz,50,25 (50%),37--63%,15,10
+marshmallow,50,9 (18%),10--31%,24,17
+click,50,29 (58%),44--71%,17,4
+tomlkit,50,5 (10%),4--21%,21,24
+cachetools,50,24 (48%),35--61%,16,10

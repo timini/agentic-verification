@@ -1,0 +1,545 @@
+item,project,file,line,function,patch,label,notes
+1,marshmallow,src/marshmallow/fields.py,862,Tuple._serialize,"--- a/src/marshmallow/fields.py
++++ b/src/marshmallow/fields.py
+@@ -860,5 +860,5 @@
+ 
+         return tuple(
+-            field._serialize(each, attr, obj, **kwargs)
++            field._serialize(each, None, obj, **kwargs)
+             for field, each in zip(self.tuple_fields, value, strict=True)
+         )
+",,
+2,more-itertools,more_itertools/more.py,2103,divide,"--- a/more_itertools/more.py
++++ b/more_itertools/more.py
+@@ -2101,5 +2101,5 @@
+     """"""
+     if n < 1:
+-        raise ValueError('n must be at least 1')
++        raise ValueError(None)
+ 
+     try:
+",,
+3,attrs,src/attr/_make.py,1605,_generate_unique_filename,"--- a/src/attr/_make.py
++++ b/src/attr/_make.py
+@@ -1603,8 +1603,8 @@
+     Create a ""filename"" suitable for a function being generated.
+     """"""
+-    return (
+-        f""<attrs generated {func_name} {cls.__module__}.""
+-        f""{getattr(cls, '__qualname__', cls.__name__)}>""
+-    )
++    return """"
++
++
++
+ 
+ 
+",,
+4,tomlkit,tomlkit/items.py,1885,Table.__copy__,"--- a/tomlkit/items.py
++++ b/tomlkit/items.py
+@@ -1887,5 +1887,5 @@
+             self._trivia.copy(),
+             self._is_aot_element,
+-            self._is_super_table,
++            None,
+             self.name,
+             self.display_name,
+",,
+5,more-itertools,more_itertools/more.py,2780,_islice_helper,"--- a/more_itertools/more.py
++++ b/more_itertools/more.py
+@@ -2778,5 +2778,5 @@
+                 else:
+                     # just pop and discard the item
+-                    cache.popleft()
++                    pass
+                 cache.append(item)
+         else:
+",,
+6,attrs,src/attr/_make.py,1885,_add_repr,"--- a/src/attr/_make.py
++++ b/src/attr/_make.py
+@@ -1883,5 +1883,5 @@
+     script, globs = _make_repr_script(attrs, ns)
+     _compile_and_eval(
+-        script, globs, filename=_generate_unique_filename(cls, ""__repr__"")
++        script, globs, filename=_generate_unique_filename(cls, ""__REPR__"")
+     )
+     cls.__repr__ = globs[""__repr__""]
+",,
+7,cachetools,src/cachetools/_cached.py,65,_locked_info,"--- a/src/cachetools/_cached.py
++++ b/src/cachetools/_cached.py
+@@ -63,5 +63,5 @@
+     def wrapper(*args, **kwargs):
+         nonlocal hits, misses
+-        k = key(*args, **kwargs)
++        k = key(*args, )
+         with lock:
+             try:
+",,
+8,attrs,src/attr/_make.py,581,_frozen_delattrs,"--- a/src/attr/_make.py
++++ b/src/attr/_make.py
+@@ -579,5 +579,5 @@
+     """"""
+     if isinstance(self, BaseException) and name == ""__notes__"":
+-        BaseException.__delattr__(self, name)
++        pass
+         return
+ 
+",,
+9,marshmallow,src/marshmallow/utils.py,15,is_generator,"--- a/src/marshmallow/utils.py
++++ b/src/marshmallow/utils.py
+@@ -13,5 +13,5 @@
+ def is_generator(obj) -> typing.TypeGuard[typing.Generator]:
+     """"""Return True if ``obj`` is a generator""""""
+-    return inspect.isgeneratorfunction(obj) or inspect.isgenerator(obj)
++    return None
+ 
+ 
+",,
+10,cachetools,src/cachetools/_cachedmethod.py,21,_warn_instance_dict,"--- a/src/cachetools/_cachedmethod.py
++++ b/src/cachetools/_cachedmethod.py
+@@ -20,5 +20,5 @@
+ def _warn_instance_dict(msg, stacklevel):
+     warnings.warn(
+-        msg,
++        None,
+         DeprecationWarning,
+         stacklevel=stacklevel,
+",,
+11,toolz,toolz/_signatures.py,759,check_keywords,"--- a/toolz/_signatures.py
++++ b/toolz/_signatures.py
+@@ -757,5 +757,5 @@
+     if keyword_exclude:
+         return True
+-    return has_keywords(func, sigspec)
++    return has_keywords(func, )
+ 
+ 
+",,
+12,attrs,src/attr/_make.py,1607,_generate_unique_filename,"--- a/src/attr/_make.py
++++ b/src/attr/_make.py
+@@ -1605,5 +1605,5 @@
+     return (
+         f""<attrs generated {func_name} {cls.__module__}.""
+-        f""{getattr(cls, '__qualname__', cls.__name__)}>""
++        f""{getattr(cls, '__qualname__', )}>""
+     )
+ 
+",,
+13,cachetools,src/cachetools/_cached.py,237,_wrapper,"--- a/src/cachetools/_cached.py
++++ b/src/cachetools/_cached.py
+@@ -235,5 +235,5 @@
+             ""@cachetools.cached(cache=None) is deprecated"",
+             DeprecationWarning,
+-            stacklevel=3,
++            stacklevel=4,
+         )
+ 
+",,
+14,tomlkit,tomlkit/container.py,257,Container.append,"--- a/tomlkit/container.py
++++ b/tomlkit/container.py
+@@ -255,5 +255,5 @@
+ 
+         if isinstance(item, AoT) and self._body and not self._parsed:
+-            item.invalidate_display_name()
++            pass
+             if item and not (""\n"" in item[0].trivia.indent or prev_ws):
+                 item[0].trivia.indent = ""\n"" + item[0].trivia.indent
+",,
+15,attrs,src/attr/validators.py,398,_DeepMapping.__call__,"--- a/src/attr/validators.py
++++ b/src/attr/validators.py
+@@ -396,5 +396,5 @@
+         """"""
+         if self.mapping_validator is not None:
+-            self.mapping_validator(inst, attr, value)
++            self.mapping_validator(attr, value)
+ 
+         for key in value:
+",,
+16,dateutil,src/dateutil/tz/tz.py,334,_ttinfo.__init__,"--- a/src/dateutil/tz/tz.py
++++ b/src/dateutil/tz/tz.py
+@@ -332,5 +332,5 @@
+     def __init__(self):
+         for attr in self.__slots__:
+-            setattr(self, attr, None)
++            pass
+ 
+     def __repr__(self):
+",,
+17,dateutil,src/dateutil/parser/_parser.py,938,parser._parse_numeric_token,"--- a/src/dateutil/parser/_parser.py
++++ b/src/dateutil/parser/_parser.py
+@@ -936,5 +936,5 @@
+                 self._assign_hms(res, value_repr, hms)
+ 
+-        elif idx + 2 < len_l and tokens[idx + 1] == ':':
++        elif idx + 2 <= len_l and tokens[idx + 1] == ':':
+             # HH:MM[:SS[.ss]]
+             res.hour = int(value)
+",,
+18,more-itertools,more_itertools/more.py,877,distinct_permutations,"--- a/more_itertools/more.py
++++ b/more_itertools/more.py
+@@ -875,5 +875,5 @@
+ 
+         indices = [items.index(item) for item in items]
+-        indices.sort()
++        pass
+ 
+         equivalent_items = {k: cycle(v) for k, v in indices_dict.items()}
+",,
+19,attrs,src/attr/_make.py,1656,_make_hash_script,"--- a/src/attr/_make.py
++++ b/src/attr/_make.py
+@@ -1654,7 +1654,7 @@
+                 cmp_name = f""_{a.name}_key""
+                 globs[cmp_name] = a.eq_key
+-                method_lines.append(
+-                    indent + f""        {cmp_name}(self.{a.name}),""
+-                )
++                pass
++
++
+             else:
+                 method_lines.append(indent + f""        self.{a.name},"")
+",,
+20,dateutil,src/dateutil/parser/isoparser.py,272,isoparser._parse_isodate_uncommon,"--- a/src/dateutil/parser/isoparser.py
++++ b/src/dateutil/parser/isoparser.py
+@@ -270,5 +270,5 @@
+             if len(dt_str) > pos:
+                 if (dt_str[pos:pos + 1] == self._DATE_SEP) != has_sep:
+-                    raise ValueError('Inconsistent use of dash separator')
++                    raise ValueError('INCONSISTENT USE OF DASH SEPARATOR')
+ 
+                 pos += has_sep
+",,
+21,marshmallow,src/marshmallow/schema.py,447,Schema.__init__,"--- a/src/marshmallow/schema.py
++++ b/src/marshmallow/schema.py
+@@ -445,5 +445,5 @@
+         for cls in reversed(self.__class__.__mro__):
+             messages.update(getattr(cls, ""error_messages"", {}))
+-        messages.update(self.error_messages or {})
++        pass
+         self.error_messages = messages
+ 
+",,
+22,dateutil,src/dateutil/tz/tz.py,1213,_tzicalvtz._find_comp,"--- a/src/dateutil/tz/tz.py
++++ b/src/dateutil/tz/tz.py
+@@ -1211,5 +1211,5 @@
+ 
+         with self._cache_lock:
+-            self._cachedate.insert(0, (dt, self._fold(dt)))
++            pass
+             self._cachecomp.insert(0, lastcomp)
+ 
+",,
+23,tomlkit,tomlkit/container.py,1081,OutOfOrderTableProxy.validate,"--- a/tomlkit/container.py
++++ b/tomlkit/container.py
+@@ -1079,5 +1079,5 @@
+             if isinstance(item, Table):
+                 for k, v in item.value.body:
+-                    temp_container.append(k, copy.deepcopy(v), validate=True)
++                    temp_container.append(k, copy.deepcopy(v), )
+ 
+         temp_container._validate_out_of_order_table()
+",,
+24,toolz,toolz/functoolz.py,315,curry._should_curry,"--- a/toolz/functoolz.py
++++ b/toolz/functoolz.py
+@@ -313,5 +313,5 @@
+         args = self.args + args
+         if self.keywords:
+-            kwargs = dict(self.keywords, **kwargs)
++            kwargs = dict(**kwargs)
+         if self._sigspec is None:
+             sigspec = self._sigspec = _sigs.signature_or_spec(func)
+",,
+25,tomlkit,tomlkit/items.py,1014,Bool.__eq__,"--- a/tomlkit/items.py
++++ b/tomlkit/items.py
+@@ -1012,8 +1012,8 @@
+ 
+     def __eq__(self, other: object) -> bool:
+-        if not isinstance(other, bool):
+-            return NotImplemented
+-
+-        return other == self._value
++        return True
++
++
++
+ 
+     def __hash__(self) -> int:
+",,
+26,attrs,src/attr/_make.py,1730,_make_eq_script,"--- a/src/attr/_make.py
++++ b/src/attr/_make.py
+@@ -1728,7 +1728,7 @@
+                 # of the evaluated function.
+                 globs[cmp_name] = a.eq_key
+-                lines.append(
+-                    f""        {cmp_name}(self.{a.name}) == {cmp_name}(other.{a.name})""
+-                )
++                pass
++
++
+             else:
+                 lines.append(f""        self.{a.name} == other.{a.name}"")
+",,
+27,click,src/click/formatting.py,309,join_options,"--- a/src/click/formatting.py
++++ b/src/click/formatting.py
+@@ -307,5 +307,5 @@
+     """"""
+     rv = []
+-    any_prefix_is_slash = False
++    any_prefix_is_slash = True
+ 
+     for opt in options:
+",,
+28,dateutil,src/dateutil/tz/_factories.py,57,_TzStrFactory.__init__,"--- a/src/dateutil/tz/_factories.py
++++ b/src/dateutil/tz/_factories.py
+@@ -55,9 +55,9 @@
+ class _TzStrFactory(_TzFactory):
+     def __init__(cls, *args, **kwargs):
+-        cls.__instances = weakref.WeakValueDictionary()
+-        cls.__strong_cache = OrderedDict()
+-        cls.__strong_cache_size = 8
++        return None
+ 
+-        cls.__cache_lock = _thread.allocate_lock()
++
++
++
+ 
+     def __call__(cls, s, posix_offset=False):
+",,
+29,toolz,toolz/functoolz.py,389,_restore_curry,"--- a/toolz/functoolz.py
++++ b/toolz/functoolz.py
+@@ -387,5 +387,5 @@
+         func = obj.func
+     obj = cls(func, *args, **(kwargs or {}))
+-    obj.__dict__.update(userdict)
++    pass
+     return obj
+ 
+",,
+30,more-itertools,more_itertools/recipes.py,1273,is_prime,"--- a/more_itertools/recipes.py
++++ b/more_itertools/recipes.py
+@@ -1271,5 +1271,5 @@
+             break
+     else:
+-        bases = (_private_randrange(2, n - 1) for i in range(64))
++        bases = (_private_randrange(2, n - 2) for i in range(64))
+ 
+     return all(_strong_probable_prime(n, base) for base in bases)
+",,
+31,tomlkit,tomlkit/parser.py,1132,Parser._parse_table,"--- a/tomlkit/parser.py
++++ b/tomlkit/parser.py
+@@ -1130,5 +1130,5 @@
+ 
+                     if self._is_child(full_key, key_next):
+-                        key_next, table_next = self._parse_table(full_key, table)
++                        key_next, table_next = self._parse_table(full_key, None)
+ 
+                         table.raw_append(key_next, table_next)
+",,
+32,attrs,src/attr/validators.py,657,_NotValidator.__call__,"--- a/src/attr/validators.py
++++ b/src/attr/validators.py
+@@ -657,5 +657,5 @@
+                 self.msg.format(
+                     validator=self.validator,
+-                    exc_types=self.exc_types,
++                    exc_types=None,
+                 ),
+                 attr,
+",,
+33,dateutil,src/dateutil/parser/_parser.py,558,_ymd.resolve_ymd,"--- a/src/dateutil/parser/_parser.py
++++ b/src/dateutil/parser/_parser.py
+@@ -556,5 +556,5 @@
+                     else:
+                         year, month, day = self
+-                elif self[0] > 12 or (dayfirst and self[1] <= 12):
++                elif self[0] > 13 or (dayfirst and self[1] <= 12):
+                     # 13-01-01
+                     day, month, year = self
+",,
+34,cachetools,src/cachetools/__init__.py,368,RRCache.clear,"--- a/src/cachetools/__init__.py
++++ b/src/cachetools/__init__.py
+@@ -366,5 +366,5 @@
+     def clear(self):
+         Cache.clear(self)
+-        self.__index.clear()
++        pass
+         del self.__keys[:]
+ 
+",,
+35,marshmallow,src/marshmallow/fields.py,2044,Method._bind_to_schema,"--- a/src/marshmallow/fields.py
++++ b/src/marshmallow/fields.py
+@@ -2042,5 +2042,5 @@
+             )
+ 
+-        super()._bind_to_schema(field_name, parent)
++        pass
+ 
+     def _serialize(self, value, attr, obj, **kwargs):
+",,
+36,click,src/click/_compat.py,117,_FixupStream.readable,"--- a/src/click/_compat.py
++++ b/src/click/_compat.py
+@@ -115,14 +115,14 @@
+ 
+     def readable(self) -> bool:
+-        if self._force_readable:
+-            return True
+-        x = getattr(self._stream, ""readable"", None)
+-        if x is not None:
+-            return t.cast(bool, x())
+-        try:
+-            self._stream.read(0)
+-        except Exception:
+-            return False
+         return True
++
++
++
++
++
++
++
++
++
+ 
+     def writable(self) -> bool:
+",,
+37,more-itertools,more_itertools/more.py,4215,callback_iter._reader,"--- a/more_itertools/more.py
++++ b/more_itertools/more.py
+@@ -4213,5 +4213,5 @@
+                 q.task_done()
+                 remaining.append(item)
+-        q.join()
++        pass
+         yield from remaining
+ 
+",,
+38,more-itertools,more_itertools/more.py,2207,adjacent,"--- a/more_itertools/more.py
++++ b/more_itertools/more.py
+@@ -2205,5 +2205,5 @@
+     # Allow distance=0 mainly for testing that it reproduces results with map()
+     if distance < 0:
+-        raise ValueError('distance must be at least 0')
++        raise ValueError(None)
+ 
+     i1, i2 = tee(iterable)
+",,
+39,toolz,toolz/functoolz.py,1035,is_arity,"--- a/toolz/functoolz.py
++++ b/toolz/functoolz.py
+@@ -1033,5 +1033,5 @@
+     if varargs:
+         return False
+-    keywords = has_keywords(func, sigspec)
++    keywords = has_keywords(None, sigspec)
+     if keywords:
+         return False
+",,
+40,cachetools,src/cachetools/__init__.py,703,TLRUCache.popitem,"--- a/src/cachetools/__init__.py
++++ b/src/cachetools/__init__.py
+@@ -701,5 +701,5 @@
+         """"""
+         with self.timer as time:
+-            self.expire(time)
++            pass
+             try:
+                 key = next(iter(self.__items))
+",,
+41,tomlkit,tomlkit/items.py,1574,Array.clear,"--- a/tomlkit/items.py
++++ b/tomlkit/items.py
+@@ -1572,5 +1572,5 @@
+         """"""Clear the array.""""""
+         list.clear(self)
+-        self._index_map.clear()
++        pass
+         self._value.clear()
+ 
+",,
+42,click,src/click/_termui_impl.py,480,_pager_contextmanager,"--- a/src/click/_termui_impl.py
++++ b/src/click/_termui_impl.py
+@@ -478,5 +478,5 @@
+ 
+         use_tempfile = WIN or sys.platform.startswith(""os2"")
+-        pager_cmd_parts = [""more""] if use_tempfile else [""less""]
++        pager_cmd_parts = [""MORE""] if use_tempfile else [""less""]
+ 
+     resolved = _resolve_pager_command(pager_cmd_parts)
+",,
+43,cachetools,src/cachetools/__init__.py,266,LFUCache.clear,"--- a/src/cachetools/__init__.py
++++ b/src/cachetools/__init__.py
+@@ -264,5 +264,5 @@
+         root = self.__root
+         root.prev = root.next = root
+-        self.__links.clear()
++        pass
+ 
+     def __touch(self, key):
+",,
+44,click,src/click/testing.py,108,_FDCapture.stop,"--- a/src/click/testing.py
++++ b/src/click/testing.py
+@@ -106,5 +106,5 @@
+         assert self._tmpfile is not None, ""_FDCapture.start() was not called""
+         os.dup2(self.saved_fd, self._targetfd)
+-        os.close(self.saved_fd)
++        pass
+         self.saved_fd = -1
+         self._tmpfile.seek(0)
+",,
+45,marshmallow,src/marshmallow/validate.py,348,Range.__init__,"--- a/src/marshmallow/validate.py
++++ b/src/marshmallow/validate.py
+@@ -346,5 +346,5 @@
+         # interpolate messages based on bound inclusivity
+         self.message_min = self.message_min.format(
+-            min_op=self.message_gte if self.min_inclusive else self.message_gt
++            min_op=self.message_gte if (self.min_inclusive) or True else self.message_gt
+         )
+         self.message_max = self.message_max.format(
+",,
+46,marshmallow,src/marshmallow/fields.py,241,Field.__init__,"--- a/src/marshmallow/fields.py
++++ b/src/marshmallow/fields.py
+@@ -239,5 +239,5 @@
+         self.error_messages = messages
+ 
+-        self.parent: Field | Schema | None = None
++        self.parent: Field | Schema | None = """"
+         self.name: str | None = None
+         self.root: Schema | None = None
+",,
+47,click,src/click/_termui_impl.py,314,ProgressBar.make_step,"--- a/src/click/_termui_impl.py
++++ b/src/click/_termui_impl.py
+@@ -312,5 +312,5 @@
+             step = time.time() - self.start
+ 
+-        self.avg = self.avg[-6:] + [step]
++        self.avg = self.avg[-7:] + [step]
+ 
+         self.eta_known = self.length is not None
+",,
+48,click,src/click/decorators.py,598,custom_version_option,"--- a/src/click/decorators.py
++++ b/src/click/decorators.py
+@@ -596,5 +596,5 @@
+     kwargs.setdefault(""expose_value"", False)
+     kwargs.setdefault(""is_eager"", True)
+-    kwargs.setdefault(""help"", _(""Show the version and exit.""))
++    pass
+     kwargs[""callback""] = show_version
+     return option(*param_decls, **kwargs)
+",,
+49,cachetools,src/cachetools/__init__.py,505,TTLCache.__setitem__,"--- a/src/cachetools/__init__.py
++++ b/src/cachetools/__init__.py
+@@ -503,5 +503,5 @@
+             self.__links[key] = link = TTLCache._Link(key)
+         else:
+-            link.unlink()
++            pass
+         link.expires = time + self.__ttl
+         link.next = root = self.__root
+",,
+50,toolz,toolz/dicttoolz.py,289,update_in,"--- a/toolz/dicttoolz.py
++++ b/toolz/dicttoolz.py
+@@ -287,5 +287,5 @@
+             d = d[k]
+             dtemp = factory()
+-            dtemp.update(d)
++            pass
+         else:
+             d = dtemp = factory()
+",,
