@@ -26,7 +26,7 @@ Researched 15 October 2026. These are feasibility findings from primary document
 
 **Repeated coverage is not a waste metric on its own.** Two tests can execute identical lines but assert different properties or exercise different values. Setup-heavy tests can also appear similar despite testing different outcomes. Treat overlap as a ranking signal and use mutation evidence plus requirements review before suggesting removal.
 
-**Keep two mutation populations.** Classical operators provide a more repeatable baseline. Agent-generated semantic faults explore missing behaviours, such as omitted tenant filtering, incorrect retry boundaries, or swallowed errors. Score and cost them independently. An LLM can also propose valid refactors or uncompilable changes: neither is a confirmed fault.
+**Keep mutation populations separate.** Classical operators provide a more repeatable baseline. Agent-generated semantic faults explore missing behaviours, such as omitted tenant filtering, incorrect retry boundaries, or swallowed errors. Score and cost them independently. The follow-up behavioural-ablation population below is also reported separately. An LLM can also propose valid refactors or uncompilable changes: neither is a confirmed fault.
 
 **Ablation must measure detection loss.** Removing a test from a green suite and observing green tells us very little. Compare which fixed faults the full and reduced suites catch, then confirm the final proposed reduction as a group. Individually redundant tests may be mutually indispensable when removed together.
 
@@ -43,3 +43,9 @@ Researched 15 October 2026. These are feasibility findings from primary document
 - Which retention policies and minimum mutation populations transfer across repositories? Initial defaults must be treated as hypotheses.
 
 These questions are explicit milestone gates in the [PRD](PRD.md).
+
+## Follow-up: production-behaviour ablation
+
+The clarified feature removes application behaviour rather than tests: no-op functions, null modules, skipped stages, and missing side effects. [Dedicated research and design notes](BEHAVIOURAL_ABLATION.md) cover extreme mutation testing, Descartes, PIT deletion/return operators, pseudo-tested methods, and statement-level evidence.
+
+Design decision: deterministic deletion is the baseline; LLMs add capability selection and interface-compatible replacements. Whole-module substitutions remain an experimental extension. Preserve separate commands and data records for production-behaviour ablation and test-removal ablation. A parent mutation being killed does not establish protection of every child behaviour.

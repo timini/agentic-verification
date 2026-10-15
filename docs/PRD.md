@@ -1,12 +1,12 @@
 # Product requirements: Test Suite Auditor
 
-Version 0.1 · 15 October 2026 · Status: proposed, research complete; implementation not started
+Version 0.2 · 15 October 2026 · Status: proposed, research complete; implementation not started
 
 ## 1. Product intent
 
 Create a Claude Code skill that audits an existing test suite and produces an evidence-backed plan to improve its speed, reliability, and fault detection. It should answer: **Which tests earn their execution cost, which behaviours lack protection, and what evidence supports changing the suite?**
 
-As generated code becomes cheaper, tests become a durable engineering asset. A growing suite can still be slow, flaky, redundant, or weak at detecting faults. High coverage does not settle these questions. The product combines profiling, per-test coverage, classical mutation testing, experimental agent-generated faults, and controlled ablation.
+As generated code becomes cheaper, tests become a durable engineering asset. A growing suite can still be slow, flaky, redundant, or weak at detecting faults. High coverage does not settle these questions. The product combines profiling, per-test coverage, classical mutation testing, experimental agent-generated faults, production-behaviour ablation, and separately controlled test-removal experiments.
 
 The research foundation and tool comparisons are in [RESEARCH.md](RESEARCH.md). Statements below are proposed requirements and design decisions unless explicitly attributed to a source. Numerical targets are initial product hypotheses, not measured results.
 
@@ -19,7 +19,7 @@ Typical jobs:
 - Find slow tests and expensive shared fixtures, then verify a refactor improves actual suite time.
 - Investigate intermittent failures without disguising them with retries.
 - Identify high-overlap tests and measure whether removing or consolidating them loses fault detection.
-- Find covered code whose incorrect behaviour still passes tests.
+- Find covered code whose incorrect or entirely missing behaviour still passes tests, including no-op functions and null components.
 - Preserve regression and contract tests needed for future implementation rewrites.
 
 Success means a smaller maintenance burden while retaining agreed behavioural protections. Test-count reduction is not itself a success metric.
@@ -28,7 +28,7 @@ Success means a smaller maintenance burden while retaining agreed behavioural pr
 
 The MVP targets Python/pytest on Linux, with pytest-cov/coverage.py for attribution and a pinned mutmut integration for classical mutations. This is a feasibility-driven default, not an assumption about the user's repositories. A framework-neutral report schema enables later JS/TS support using Stryker.
 
-MVP includes inventory, runtime profiling, bounded repeat runs, overlap analysis, sampled classical mutations, targeted ablation, and Markdown/JSON reports. A second milestone adds opt-in semantic mutation proposals from Claude.
+MVP includes inventory, runtime profiling, bounded repeat runs, overlap analysis, sampled classical mutations, targeted test-suite ablation, and Markdown/JSON reports. The feasibility spike also evaluates deterministic function/call deletion. A later milestone adds opt-in semantic mutation proposals and LLM-directed null-component experiments from Claude. Behavioural ablation removes production capabilities; test-suite ablation removes tests. These remain separate experiment types.
 
 Not included: a proof of correctness, automatic deletion or quarantine of tests, unattended production changes, a universal language adapter, production fault injection, or automatic database schema rewrites. End-to-end and migration tests can be inventoried and protected; their deep mutation execution is deferred.
 
@@ -40,7 +40,8 @@ Proposed commands, not currently implemented:
 /test-suite-audit quick
 /test-suite-audit deep --budget-minutes 30
 /test-suite-audit semantic --max-mutants 20
-/test-suite-audit ablate --candidate-group duplicate-parser-tests
+/test-suite-audit ablate-behaviour --target orders --max-mutants 20
+/test-suite-audit ablate-tests --candidate-group duplicate-parser-tests
 ```
 
 The skill discovers the test command and adapter, explains the available evidence and budget, and invokes a deterministic runner. Existing user configuration takes precedence over discovery. Unsupported adapters produce an explicit partial report rather than fabricated measurements.
@@ -101,7 +102,21 @@ A survivor is a candidate gap. Confirm its behavioural deviation against a revie
 
 For proposed new tests, require green on the pristine implementation, red on the confirmed fault, and a clear link to intended behaviour. Keep a held-out fault population that did not drive test generation.
 
-### F7. Perform controlled ablation
+### F6a. Ablate production behaviour
+
+Temporarily remove a production capability while freezing the test suite. Support deterministic whole-function suppression and statement/call deletion first; pilot LLM-proposed null components, protocol-compatible function replacements, and targeted side-effect suppression. The research basis is extreme mutation testing and statement deletion; see [Behavioural ablation](BEHAVIOURAL_ABLATION.md) for primary sources, operator details, and a worked example.
+
+The LLM identifies capabilities and proposes minimal interventions. A runner applies each patch to an isolated pristine baseline, checks structural validity, verifies activation, executes tests, and records outcomes. Null replacements must preserve necessary public interfaces and async/generator/context-manager protocols. They must not hard-code test answers, modify tests, or recreate the behaviour being removed. Unsupported replacements are reported explicitly.
+
+A valid runtime exception caused by a mutant counts as a kill, with detection mechanism marked separately from a behavioural assertion. Parse/build/import-invalid patches are invalid; unrelated execution failures are infrastructure failures. Verify that mocks, alternative imports, caches, and subprocesses did not bypass the mutated implementation. A non-activated replacement is not evidence that missing behaviour went unnoticed.
+
+Confirm important survivors with broader tests and a witness showing loss of required behaviour. Label optional, equivalent-in-scope, mock-shielded, and unresolved outcomes separately. One surviving replacement is not enough to classify a method as pseudo-tested: require covered execution and survival of every applicable replacement in a declared set, with no unresolved attempts, and retain that scope in the label.
+
+Use module → function → side-effect experiments for prioritization, not as a monotonic search. A killed whole-function mutant can conceal an undetected missing effect. Sample fine-grained interventions beneath both killed and surviving parents, each against the pristine baseline. Store composite module interventions separately from single-effect mutations and never infer child outcomes from a parent result.
+
+Report attempted/activated targets, replacement sets, status counts, detection mechanisms, confirmed gaps, and cost. Keep these results separate from classical and test-aware semantic scores. Evaluate deterministic deletion and LLM-directed ablation against equal-budget classical runs; measure unique reviewed gaps, incidental crashes, invalid proposals, and reviewer effort. No automatic code removal follows from a surviving ablation.
+
+### F7. Perform controlled test-suite ablation
 
 Construct a sparse kill matrix M[t,m] whose cells are killed, did-not-kill, or unknown. A mutation tool that stops on the first failing test supplies only partial evidence. Targeted reruns must establish additional killers where needed; unknown is never zero.
 
@@ -128,9 +143,10 @@ flowchart LR
     A[Claude skill] --> B[Audit runner and budget controller]
     B --> C[Test adapter and baseline]
     C --> D[Timing and coverage evidence]
-    B --> E[Classical and semantic mutant adapters]
-    D --> F[Ablation planner]
+    B --> E[Classical, semantic, and behavioural mutant adapters]
+    D --> F[Test-removal ablation planner]
     E --> F
+    E --> G
     F --> G[Controlled validation runs]
     G --> H[Versioned JSON and Markdown report]
     H --> A
@@ -145,7 +161,8 @@ Core records:
 - `Mutant`: ID, source hash, patch hash, operator/origin, contract/witness, selected tests, status, equivalence annotation, logs.
 - `Observation`: test/mutant IDs, killed/did-not-kill/unknown, attempt, duration, failure signature, provenance.
 - `Finding`: category, severity, confidence label, evidence IDs, assumptions, suggested action, validation state.
-- `Ablation`: retained/removed IDs, frozen population, full/reduced results, lost detections, timing samples, holdout outcome.
+- `BehaviourAblation`: capability ID, granularity, replacement set/value, parent experiment, interface checks, activation evidence, witness, detection mechanism, linked mutant/run IDs.
+- `TestAblation`: retained/removed IDs, frozen population, full/reduced results, lost detections, timing samples, holdout outcome.
 
 Outputs: `report.md`, versioned `report.json`, mutant patches, and bounded logs in a local audit directory. Proposed configuration `test-suite-audit.toml` defines adapter, source/test paths, commands, budgets, protected tags, environment, and excluded paths. No cloud service is required for deterministic measurements; semantic analysis uses the configured model service and must respect repository data-sharing settings.
 
@@ -155,7 +172,7 @@ Cache keys include source, tests, configuration, dependency lock, tool versions,
 
 ## 7. Budgets and operating modes
 
-Quick mode runs inventory, a baseline, and available timing/coverage analysis with a proposed five-minute cap. It makes no unsupported mutation or flake claims. Deep mode defaults to a 30-minute cap and a configured mutant count; semantic mode adds explicit model-token and candidate caps. Limits are configurable and must be printed before work begins.
+Quick mode runs inventory, a baseline, and available timing/coverage analysis with a proposed five-minute cap. It makes no unsupported mutation or flake claims. Deep mode defaults to a 30-minute cap and a configured mutant count; semantic mode adds explicit model-token and candidate caps. Behavioural ablation has explicit target, replacement-count, time, and model-token caps, with a reserved share for independent fine-grained sampling. Limits are configurable and must be printed before work begins.
 
 The controller reserves time for reporting and cleanup, checks remaining budgets before launching work, and terminates over-budget processes. Budget exhaustion produces a useful partial report. Existing CI telemetry can reduce reruns, but provenance and comparability must be checked. No hidden unbounded “full audit.”
 
@@ -169,6 +186,13 @@ Required acceptance cases:
 
 | Case | Required outcome |
 | --- | --- |
+| No-op covered function; all declared replacements survive | Candidate pseudo-tested label includes replacement set, scope, and activation evidence |
+| One constant survives, another is killed | Report the surviving variant without a blanket pseudo-tested label |
+| Removed event publication; ID-return test passes | Confirm missing required effect with a witness and surface the scoped gap |
+| Null module breaks imports or async protocol | Invalid/unsupported replacement, not behavioural detection |
+| Valid null return causes downstream exception | Kill recorded with runtime-exception mechanism |
+| Tests mock out mutated component | Non-activation/mock shielding recorded; no confirmed gap claim |
+| Whole-function mutant killed, one side effect survives | Fine-grained gap still discovered; no parent-to-child inference |
 | Same covered lines, distinct assertions | Overlap flagged; no unsupported redundancy claim |
 | Two interchangeable killers | Combined deletion rejected when the last detector is lost |
 | Engine stops at first kill | Unobserved cells remain unknown; targeted evidence gathered |
@@ -190,15 +214,15 @@ Track recommendation acceptance, confirmed-gap yield, false-positive recommendat
 
 ## 9. Delivery sequence
 
-1. **Feasibility spike:** pin dependencies; validate parametrized-test contexts, shared fixtures, subprocess limitations, mutation patch/status export, and partial kill-matrix handling. Exit with adapter contracts and measured overhead. If mutmut integration needs unstable internals, narrow supported versions or use explicit patch-replay execution.
+1. **Feasibility spike:** pin dependencies; validate parametrized-test contexts, shared fixtures, subprocess limitations, mutation patch/status export, partial kill-matrix handling, and deterministic function/call deletion with activation checks. Exit with adapter contracts and measured overhead. If mutmut integration needs unstable internals, narrow supported versions or use explicit patch-replay execution.
 2. **Audit MVP:** skill wrapper, runner, inventory, timings, flake observations, overlap, classical sampling, budgets, reproducible reports, and known-answer fixtures.
-3. **Ablation pilot:** protected policies, group experiments, holdout validation, and measured fast-subset recommendations across three repositories.
-4. **Semantic experiment:** structured fault proposals, witness review, invalid-patch rejection, and equal-budget comparison. Release behind explicit opt-in if evidence supports it.
+3. **Test-suite ablation pilot:** protected policies, group experiments, holdout validation, and measured fast-subset recommendations across three repositories.
+4. **Semantic and behavioural-ablation experiment:** structured fault proposals, null modules and function replacements, targeted side-effect suppression, witness review, activation and protocol checks, and equal-budget comparison against deterministic deletion and classical operators. Release behind explicit opt-in if evidence supports it.
 5. **Expansion:** JS/TS adapter, CI trend imports, optional scheduled audits, and richer contract/migration evidence. Prioritize based on pilot demand.
 
 ## 10. Risks and decisions still open
 
-The central risk is optimizing against an incomplete oracle. Controls include protected behaviours, historical bugs, holdouts, explicit uncertainty, and review; none proves correctness. Equivalent mutants, selection bias, flaky environments, correlated model errors, and incomplete coverage attribution can all distort conclusions.
+The central risk is optimizing against an incomplete oracle. Controls include protected behaviours, historical bugs, holdouts, explicit uncertainty, and review; none proves correctness. Equivalent mutants, selection bias, flaky environments, correlated model errors, and incomplete coverage attribution can all distort conclusions. Coarse ablation can fail through incidental crashes while missing unasserted effects; module replacements can be composite, protocol-incompatible, or bypassed by mocks. Hierarchical scheduling must not imply monotonic fault detection.
 
 Initial decisions: Python first; a skill plus runner; existing classical engines; report-only default; separate semantic experiments; no universal score threshold. Open decisions after the spike: exact supported dependency versions, packaging/distribution, historical CI adapters, retention-policy defaults, and whether measured semantic yield merits its cost.
 
