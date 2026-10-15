@@ -1,0 +1,93 @@
+# Study corpus. Pinned before any data was collected (see PREREGISTRATION.md).
+# Each project is cloned at `sha`, installed into its own uv venv, and tested with `test_cmd`.
+# `source` lists the production packages eligible for mutation; `tests` is the pytest target.
+# Selection criteria: mature, pure Python, pytest suite, MIT/BSD/Apache-style licence,
+# suite expected to finish in under ~5 minutes on a laptop. Inclusion reasons are recorded per entry.
+
+[[project]]
+name = "attrs"
+repo = "https://github.com/python-attrs/attrs"
+tag = "26.1.0"
+sha = "7bfc49e9b22d5ba25b6e429524c3d49fee27cb36"
+source = ["src/attr", "src/attrs"]
+tests = ["tests"]
+install = ["-e", ".[tests]"]
+pytest_args = ["-p", "no:cacheprovider", "--ignore=tests/test_pyright.py"]
+reason = "Class-generation library; heavy use of Hypothesis and parametrization; code generated at import time."
+
+[[project]]
+name = "more-itertools"
+repo = "https://github.com/more-itertools/more-itertools"
+tag = "v11.2.1"
+sha = "4aeb4338ae1407d8da9723e86da99efeb446f719"
+source = ["more_itertools"]
+tests = ["tests"]
+install = ["-e", "."]
+pytest_args = ["-p", "no:cacheprovider"]
+reason = "Many small pure functions in two large modules; unittest-style tests run under pytest."
+
+[[project]]
+name = "dateutil"
+repo = "https://github.com/dateutil/dateutil"
+tag = "2.9.0.post0"
+sha = "1ae807774053c071acc9e7d3d27778fba0a7773e"
+source = ["src/dateutil"]
+tests = ["tests"]
+install = ["-e", ".", "freezegun", "hypothesis"]
+pytest_args = ["-p", "no:cacheprovider", "--ignore=tests/property"]
+reason = "Parsing and time-zone logic with environment-dependent behaviour; older test style."
+
+[[project]]
+name = "toolz"
+repo = "https://github.com/pytoolz/toolz"
+tag = "1.2.0"
+sha = "451af60dec590a6010e2babdbf391ea8f815122f"
+source = ["toolz"]
+tests = ["toolz/tests"]
+install = ["-e", "."]
+pytest_args = ["-p", "no:cacheprovider"]
+reason = "Functional utilities; tests live inside the package; short plain-function tests."
+
+[[project]]
+name = "marshmallow"
+repo = "https://github.com/marshmallow-code/marshmallow"
+tag = "4.3.1"
+sha = "c7b559a1fa3aba57ca6dba0ab336841c5038a782"
+source = ["src/marshmallow"]
+tests = ["tests"]
+install = ["-e", ".[tests]"]
+pytest_args = ["-p", "no:cacheprovider", "--ignore=tests/mypy_test_cases"]
+reason = "Schema validation with many interacting classes and error paths; fixture-heavy."
+
+[[project]]
+name = "click"
+repo = "https://github.com/pallets/click"
+tag = "8.5.0"
+sha = "8b19813f2bfca99f1018a587a8cf54fc959f2e5d"
+source = ["src/click"]
+tests = ["tests"]
+install = ["-e", "."]
+pytest_args = ["-p", "no:cacheprovider", "--ignore=tests/typing"]
+reason = "CLI framework with I/O, terminal and process side effects; integration-style tests via CliRunner."
+
+[[project]]
+name = "tomlkit"
+repo = "https://github.com/python-poetry/tomlkit"
+tag = "0.15.1"
+sha = "1bd7e3bc5bcc957d359a6c4d8e420163f32ac009"
+source = ["tomlkit"]
+tests = ["tests"]
+install = ["-e", "."]
+pytest_args = ["-p", "no:cacheprovider"]
+reason = "Stateful parser and document model; round-trip tests driven by a shared conformance corpus."
+
+[[project]]
+name = "cachetools"
+repo = "https://github.com/tkem/cachetools"
+tag = "v7.2.1"
+sha = "9976f1a8076631560f49c5b0dfda7e4d00ee0a4a"
+source = ["src/cachetools"]
+tests = ["tests"]
+install = ["-e", "."]
+pytest_args = ["-p", "no:cacheprovider"]
+reason = "Small library dominated by side effects (eviction, timers, locking); good probe for statement deletion."
