@@ -164,3 +164,19 @@ def test_change_without_mutants_is_not_verified(repo, tmp_path):
     st = _verify(repo, tmp_path, "decorated")
     assert st.change["verdict"] == "incomplete"
     assert any("no valid mutant" in r for r in st.change["reasons"])
+
+
+def test_base_check_reports_tests_that_detect_the_change(repo, capsys):
+    import json
+
+    from tsa.cli import main
+
+    root = repo.project.root
+    _append(root / "src/known/orders.py", NEW_CODE)
+    _append(root / "tests/test_orders.py", STRONG_TEST)
+    code = main(["base-check", str(root), "--python", str(repo.project.python)])
+    out = json.loads(capsys.readouterr().out)
+    assert code == 0
+    assert "tests/test_orders.py::test_tax_values" in out["detect_change"]
+    assert "tests/test_orders.py::test_is_adult_boundary" in out["pass_on_both"]
+    assert (root / "src/known/orders.py").read_text().endswith(NEW_CODE)  # working tree untouched

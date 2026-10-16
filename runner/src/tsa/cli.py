@@ -42,6 +42,12 @@ def main(argv: list[str] | None = None) -> int:
             p.add_argument("--tests-file", default=None, help="file with one node ID per line")
             p.add_argument("--from-run", default=None,
                            help="deep audit directory; its mutants are excluded, so the check uses fresh ones")
+    bc = sub.add_parser("base-check", help="run tests against the source as it was at --base, in a disposable "
+                        "copy, to show which of them detect the change")
+    bc.add_argument("path", nargs="?", default=".")
+    bc.add_argument("--base", default="HEAD")
+    bc.add_argument("--python", default=None)
+    bc.add_argument("tests", nargs="*", help="node IDs or test files (default: test files changed since --base)")
     r = sub.add_parser("replay", help="re-run one recorded mutant in a disposable copy")
     r.add_argument("--run", required=True, help="audit output directory")
     r.add_argument("--mutant", required=True)
@@ -52,11 +58,13 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "replay":
         return _replay(Path(args.run), args.mutant, args.all)
+    if args.cmd == "base-check":
+        return _base_check(Path(args.path), args.base, args.tests, args.python)
 
     cfg = config.load(Path(args.path))
     if args.python:
         from dataclasses import replace
-        cfg.project = replace(cfg.project, python=Path(args.python))
+        cfg.project = replace(cfg.project, python=_interpreter(args.python))
         cfg.discovered["python"] = "--python"
     out_root = Path(args.out) if args.out else cfg.project.root / ".test-suite-audit"
     extra: dict = {}
@@ -118,6 +126,60 @@ def _replay(run_dir: Path, mutant_id: str, all_tests: bool = False) -> int:
                           "failing_without_mutant": sorted(failing_before),
                           "activated_now": bool(run.activation_hits)}, indent=2))
     return 0
+
+
+def _interpreter(value: str) -> Path:
+    """An absolute interpreter path: the runner runs pytest from a copy, where relative paths break."""
+    import shutil
+
+    if "/" not in value and "\\" not in value:
+        found = shutil.which(value)
+        if found:
+            return Path(found)
+    return Path(value).absolute()  # not resolve(): a venv interpreter is a symlink to the base one
+
+
+def _base_check(path: Path, base: str, tests: list[str], python: str | None) -> int:
+    """Each selected test's outcome on the current source and on the source at ``base``.
+
+    A test that passes now and fails on the base version detects the change. Only production
+    source files are reverted; the tests stay as they are now. The working tree is not touched.
+    """
+    from dataclasses import replace
+
+    from .diff import changed_lines
+
+    cfg = config.load(path)
+    proj = cfg.project if not python else replace(cfg.project, python=_interpreter(python))
+    ch = changed_lines(proj.root, base)
+    src = {str(f.relative_to(proj.root)) for f in proj.source_files()}
+    changed_src = sorted(f for f in ch.lines if f in src)
+    if not tests:
+        tests = sorted(f for f in ch.lines if f.endswith(".py") and f not in src and (proj.root / f).exists())
+    if not changed_src or not tests:
+        print(json.dumps({"error": "no changed source files" if not changed_src else "no tests to run",
+                          "base": base}))
+        return 2
+    files = sorted({t.split("::", 1)[0] for t in tests})
+    sel = [t for t in tests if "::" in t] or None
+    with tempfile.TemporaryDirectory(prefix="tsa-base-") as tmp:
+        ws = replace(proj.copy_to(Path(tmp) / "proj"), tests=tuple(files))
+        now = run_pytest(ws, select=sel)
+        for f in changed_src:
+            old = subprocess.run(["git", "show", f"{ch.commit}:{f}"], cwd=proj.root, capture_output=True)
+            target = ws.root / f
+            if old.returncode == 0:
+                target.write_bytes(old.stdout)
+            else:
+                target.unlink(missing_ok=True)  # file is new since base
+        before = run_pytest(ws, select=sel)
+    passed_now = {n for n, o in now.outcomes.items() if o.outcome == "passed"}
+    detecting = sorted(passed_now & before.failed_ids())
+    print(json.dumps({"base": base, "reverted": changed_src, "tests_run": len(now.outcomes),
+                      "detect_change": detecting, "pass_on_both": sorted(passed_now - before.failed_ids()),
+                      "fail_now": sorted(now.failed_ids()),
+                      "base_collection_error": before.collection_error}, indent=2))
+    return 0 if detecting else 1
 
 
 if __name__ == "__main__":

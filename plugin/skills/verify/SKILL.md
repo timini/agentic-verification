@@ -18,9 +18,14 @@ that looked well tested.
 
 ```bash
 AV='uvx --from git+https://github.com/timini/agentic-verification@v0.3.0#subdirectory=runner agentic-verification'
-$AV verify <path> --base <rev> [--budget-minutes N]
+$AV verify <project-root> --base <rev> [--budget-minutes N]
 $AV replay --run <run-dir> --mutant <id> --all
+$AV base-check <project-root> --base <rev> [tests...]
 ```
+
+Pass the project root (the directory pytest runs in), not a package directory or a file.
+`base-check` runs tests against the production source as it was at `--base`, in a disposable
+copy, and lists the tests that pass now and fail there: those detect the change.
 
 The runner works in a disposable copy and writes only to `.test-suite-audit/` in the project.
 It needs Python 3.12+ and `pytest-cov` in the project's environment, plus `pytest-randomly` for
@@ -38,6 +43,8 @@ with the verdict and report paths.
 - Only the runner decides that a mutant is killed. Do not call a mutant equivalent yourself;
   list it for the user with your reasoning.
 - Do not retry a failing or flaky test until it passes. Report it; it hides real failures.
+- Never stash, revert or edit production files to see a test fail on the old code. Use
+  `base-check`, which does it in a copy; an interrupted stash leaves the user's code broken.
 
 ## Steps
 
@@ -49,7 +56,8 @@ with the verdict and report paths.
    - a differential test, for a refactor or migration: the old version (`git show <base>:<file>`)
      is the oracle; compare on generated inputs and list intentional differences with a reason;
    - example tests otherwise, including the edge cases the criteria name.
-   Write that test and see it fail before the change, where that is possible.
+   Write that test and see it fail before the change. If the change already exists, run
+   `base-check` to confirm the test fails on the old code.
 2. **Keep the loop fast.** While iterating, run only the tests for the area you are changing.
    The verify report lists the tests covering the changed lines and how long they take.
 3. **Run verify** once the change and its tests are written. Read the verdict:
@@ -57,7 +65,9 @@ with the verdict and report paths.
      killed. Go to step 5.
    - `gaps`: changed lines no test runs, surviving mutants, or a suite that is not green and
      deterministic. Go to step 4.
-   - `incomplete`: the budget ended first. Rerun with a larger `--budget-minutes`.
+   - `incomplete`: the budget ended first (rerun with a larger `--budget-minutes`), or no
+     mutant applies to the changed lines, for example a decorated function. Then the mutants
+     give no evidence: rely on `base-check` and say so.
    - `no change`: nothing under the source packages changed since `--base`; check the base.
 4. **Close each gap**, then rerun verify (step 3). Stop after three rounds and report what is left.
    - Surviving mutant: read its patch in `mutants/<id>.patch`. It shows a wrong version of your
@@ -67,13 +77,15 @@ with the verdict and report paths.
    - Uncovered changed line: test it, or remove it if it is dead code.
    - New test that catches none of the change's mutants (`change-weak-tests`): strengthen its
      assertions, or explain what it checks instead.
-   - Failing, intermittent or order-dependent test: report it; do not work around it.
+   - Failing, intermittent or order-dependent test: report it; do not work around it. Tests
+     that already fail on the base revision are listed as a caveat and do not cause `gaps`.
 5. **Optional, for larger changes: review in a fresh context.** If you can start a subagent, give
    it only the success criteria, the diff and the test files, and ask it to write one test that
    should pass and might not. Run it. A failure is a bug or a missing requirement.
 6. **Report evidence, not a diff.** Lead with the verdict, then:
    - the success criteria and which tests check each one;
    - mutants killed out of mutants run on the changed lines, and changed lines not covered;
+   - which new tests `base-check` shows failing on the old code;
    - tests you added, and gaps closed this way;
    - what is left: surviving mutants with your reason, and anything not assessed;
    - the fast check command from the report, and the path to `report.md`.
