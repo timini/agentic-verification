@@ -57,6 +57,8 @@ The study covered six pre-registered hypotheses on eight Python projects: attrs,
 | H5 | Per-test coverage contexts add a lot of overhead | Supported. Suites ran 2.48x slower overall (1.74-3.88). |
 | H6 | A few reruns miss intermittent tests | 2 intermittent tests in 480 runs. Both were order-dependent, and same-order reruns never showed one of them failing. |
 
+A Linux replication of H1, H3 and H5 on two projects, run on GitHub Actions, matched the macOS results closely.
+
 ### Benchmark: does the skill help?
 
 An agent following the skill was compared with the same agent (Sonnet) without it, on the same eight projects. Every claim either agent made was checked independently against a clean copy of the project.
