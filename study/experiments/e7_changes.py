@@ -8,7 +8,7 @@ import json
 import shutil
 import sys
 
-from bench2.common import ROOT, build_repo, commits, entry, write_config
+from bench2.common import ROOT, repo, build_repo, commits, entry, write_config
 from harness.records import Recorder
 from tsa import config
 from tsa.audit import run_audit
@@ -48,7 +48,7 @@ def main() -> None:
 
 def _all_changed(e, c) -> list[str]:
     import subprocess
-    out = subprocess.run(["git", "diff", "--name-only", c["parent"], c["commit"]], cwd=e.dir,
+    out = subprocess.run(["git", "diff", "--name-only", c["parent"], c["commit"]], cwd=repo(e),
                          capture_output=True, text=True, check=True).stdout
     return [p for p in out.splitlines() if p]
 
