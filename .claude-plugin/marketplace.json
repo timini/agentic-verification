@@ -4,12 +4,12 @@
   "owner": {
     "name": "Tim Richardson"
   },
-  "description": "Agentic Verification: test-suite audits for Claude Code",
+  "description": "Agentic Verification: check that tests would catch broken code, for Claude Code on Python and pytest",
   "plugins": [
     {
       "name": "agentic-verification",
       "source": "./plugin",
-      "description": "Check that the tests guarding your code actually catch faults: audit a pytest suite for cost, order-dependent and intermittent failures, coverage overlap, and behaviour no test notices when it is removed. Report-only.",
+      "description": "Agentic verification for Python/pytest. Verify a change: run every mutant of the changed lines and write tests until the tests catch them. Audit a suite: find what it would not catch, what makes it too slow or flaky for an agent loop, and which tests can go without losing detection.",
       "category": "development",
       "license": "MIT"
     }

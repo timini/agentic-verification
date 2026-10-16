@@ -1,0 +1,4 @@
+Project,Tests,Candidates,Share,Time share,Held-out run,Killed,Kills lost,Lines lost,Weak tests,Verdict
+attrs,1377,1100,80%,74%,1019,601,63,0,62,refuted
+marshmallow,1186,925,78%,67%,367,274,5,0,4,refuted
+click,1990,1680,84%,81%,983,765,60,0,8,refuted

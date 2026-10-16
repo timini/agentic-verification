@@ -1,6 +1,6 @@
-# Product requirements: Test Suite Auditor
+# Product requirements: Agentic Verification
 
-Version 0.3 · 15 October 2026 · Status: audit MVP implemented (`runner/`, `skills/`); requirements checked against our own study (section 11)
+Version 0.4 · 16 October 2026 · Status: audit and change verification implemented (`runner/`, `plugin/`); requirements checked against our own study (sections 11 and 12)
 
 ## 1. Product intent
 
@@ -243,3 +243,25 @@ We tested the design rules above on eight Python projects before relying on them
 
 
 The plugin itself was then benchmarked against the same agent without it, with every claim checked independently ([study/BENCHMARK.md](../study/BENCHMARK.md), paper section 5). Precision of untested-behaviour claims was similar (100% against 95%). The skill's verified claims were mostly gaps in covered code (71 against 23), it never recommended a test removal, and it never edited source in place (the baseline did so in 3 of 8 runs). The benchmark also found a mutant-generation defect, now fixed, and showed that deep audits of projects over about 3,500 executable lines need more than 12 minutes.
+
+
+## 12. Change verification and the agent loop (v0.4)
+
+Sections 1 to 11 cover auditing an existing suite. Addy Osmani's [Agentic Verification](https://addyo.substack.com/p/agentic-verification) argues that the bottleneck for coding agents is checking their work, and that people should review evidence instead of diffs. Measured against that, the audit-only product had four gaps. Version 0.4 closes them.
+
+| Gap | Requirement | Implementation |
+|---|---|---|
+| Nothing checked a change as it was made | V1. After an agent changes code, run every mutant of the changed lines and report whether the tests catch them, as a verdict: verified, gaps, incomplete or no change. "Verified" is relative to those mutants only, and no evidence is never verified. | `verify --base REV`; the `verify` skill |
+| Agents could not see a new test fail on the old code without editing the user's tree | V2. Run chosen tests against the production source as it was at a base revision, in a disposable copy. | `base-check` |
+| Bloat was reported only as overlap, which the study showed is not redundancy | V3. Propose a removal set chosen jointly (it keeps every observed kill and covered line), and check it on mutants it was not chosen from before calling it anything but a candidate. Report tests that catch none of the mutants they run. | `deep` efficacy step; `prune-check --from-run` |
+| No standing check in the loop | V4. Fail a pull request whose changed lines have surviving mutants, and report a suite too slow to run on every edit (over one minute). | `action.yml`; `--fail-on-gaps`; `slow-loop` finding |
+
+The skill tells the agent to define the check before coding (end-to-end, property, differential or example tests, in that order of preference), keep the inner loop to the tests covering the change, never weaken or work around a test, optionally review in a fresh context, and report evidence: criteria, tests, mutants killed, what is left.
+
+Evidence for these requirements is pre-registered in `study/VERIFY_BENCHMARK.md`:
+
+- H7 measures how often real upstream commits leave changed lines unchecked.
+- H8 tests whether the jointly chosen removal sets hold on held-out mutants.
+- The verify benchmark compares an agent with and without the skill on real commits, scored by whether its tests fail on the code as it was before the commit.
+
+Still out of scope: semantic (model-proposed) mutants, JavaScript and TypeScript, and mutation of decorated functions and generators.

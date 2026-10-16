@@ -1,0 +1,56 @@
+\section{Change verification and removal checks}
+\label{sec:verify}
+
+Version 0.3 of the plugin adds two functions that the earlier sections did not test:
+\begin{itemize}
+  \item \texttt{verify}, which runs every mutant of the lines changed since a base revision and gives a verdict (verified, gaps, incomplete);
+  \item \texttt{prune-check}, which checks a proposed set of test removals on mutants it was not chosen from.
+\end{itemize}
+The deep audit also proposes a removal set, chosen jointly by a greedy cover that keeps every observed kill and every covered line. These were pre-registered in \texttt{study/VERIFY\_BENCHMARK.md} before any commit was selected or run, together with one pilot audit made during development, which is reported there and excluded.
+
+\subsection{H7: do real changes leave changed lines unchecked?}
+
+\input{generated/h7}
+
+We ran \texttt{verify} on the three most recent commits per project that change executable production lines, \HSevenCommits{} in all (dateutil had only one in its last 300 commits), with the project's own tests at that commit (Table~\ref{tab:h7}).
+\begin{itemize}
+  \item \HSevenIncomplete{} commits had no applicable mutant: their changed lines are in decorated functions, at module level, or are statements mutmut does not mutate. They give no evidence either way.
+  \item Of the \HSevenJudged{} commits that could be judged, \HSevenGaps{} (\HSevenGapShare{}, Wilson 95\% CI \HSevenGapShareLo{} to \HSevenGapShareHi{}) had gaps. \HSevenWithSurvivor{} had a surviving mutant and \HSevenWithUncovered{} had changed lines no test runs.
+  \item Pooled over all commits, the tests caught \HSevenRate{} of the \HSevenMutants{} mutants on changed lines.
+\end{itemize}
+We predicted at least half, so H7 is \HSevenSupported{} at this sample size: the point estimate is just below the threshold and the interval is wide. The survivors were concentrated in larger changes; the one-line changes that could be judged were all verified. A \texttt{verify} run took a median of \HSevenMedianMinutes{} minutes.
+
+\subsection{H8: do jointly chosen removal sets hold on held-out mutants?}
+
+\input{generated/h8}
+
+For each project, a 20-minute deep audit proposed a removal set. \texttt{prune-check} then ran mutants the audit had not used, on every line the removed tests run, against the whole suite (Table~\ref{tab:h8}).
+\begin{itemize}
+  \item The sets were large: \HEightCandidates{} of \HEightTests{} tests (\HEightCandidateShare{}) across \HEightProjects{} projects.
+  \item Every set was refuted. \HEightLost{} of \HEightKilled{} held-out kills (\HEightLostShare{}, \HEightLostShareLo{} to \HEightLostShareHi{}) were made only by tests in the set.
+  \item No covered line was lost.
+\end{itemize}
+We predicted below 2\%, so H8 is \HEightSupported{}. A greedy cover fitted to one mutant sample keeps only one killer per mutant. Each removed test is then the last guard for some mutants that were never sampled. This is H4's result again, for a set chosen jointly rather than one test at a time: redundancy measured on a sample does not transfer to the population. The plugin now presents these sets only as an upper bound and requires \texttt{prune-check} before any removal is suggested.
+
+\subsection{Verify benchmark}
+
+\input{generated/bench2}
+
+We selected the two most recent commits per project that change existing behaviour and come with an upstream test that fails on the parent's source. That gave \VTasks{} tasks; dateutil had none. Each task's workspace had the commit's source change but not its tests. Two Sonnet subagents per task, one following the \texttt{verify} skill and one without it, were asked to make sure the change was properly verified. The skill arm used the runner pinned at registration.
+
+\paragraph{Real fault (V1, primary).} The skill arm's tests failed on the parent's source in \VOneSkill{} of \VTasks{} tasks, the baseline's in \VOneBase{}. Paired, both arms detected the change in \VPairBoth{} tasks, the baseline alone in \VPairBaseOnly{}, and the skill alone in \VPairSkillOnly{}. The prediction (skill at least as many) is not met. In the one discordant task, the skill agent obeyed the skill's rule against editing production code. It therefore did not check its test against the old code, and that test did not detect the change. The baseline agent stashed the change and checked. The runner now provides \texttt{base-check}, which runs tests against the base revision's source in a disposable copy, and the skill uses it. A capable agent given the commit message already writes tests that tell the old code from the new; on this measure the skill adds nothing.
+
+\paragraph{Mutants of the change (V2).} The skill arm's final suites caught \VTwoSkillRate{} of the mutants on the changed lines, the baseline's \VTwoBaseRate{}, and the upstream developers' own tests \VTwoUpRate{}. Verified verdicts were \VTwoSkillVerified{}, \VTwoBaseVerified{} and \VTwoUpVerified{} of \VTasks{}. The skill arm optimises against this measure, so it is supporting evidence only. The upstream developers' tests were the weakest of the three on this measure: they left surviving or uncovered mutants in \VUpWithSurvivors{} of the \VUpWithMutants{} tasks with mutants, which matches H7.
+
+\paragraph{Safety (V3) and finished suites (V4).} No run in either arm left production source modified, removed a test, or left a test it wrote failing. \VThreeSkillIdChanges{} skill and \VThreeBaseIdChanges{} baseline runs lost only parametrized test IDs (deviation 4). However, \VInPlaceBase{} of \VTasks{} baseline agents and \VInPlaceSkill{} skill agents temporarily stashed the production change in the user's working tree to compare old and new behaviour. An interruption at that point leaves the user's change missing. The skill now forbids this and gives \texttt{base-check} as the alternative.
+
+\paragraph{Cost and use.} The skill arm took a median of \VMinutesSkill{} minutes against \VMinutesBase{}, and added a median of \VTestsSkill{} and \VTestsBase{} tests. In \VWrongPath{} of the \VTasks{} skill runs the agent first gave the runner a package directory or a file instead of the project root and got \texttt{no change}. The runner now finds the project root itself.
+
+\paragraph{Defects found.} The benchmark also exposed defects in how the pinned runner worded verdicts (deviation 2):
+\begin{itemize}
+  \item it called a change with no applicable mutant \emph{verified};
+  \item it let an unrelated, already-failing test turn the verdict into \emph{gaps};
+  \item it counted timed-out mutants among the killed in a summary sentence;
+  \item it flagged every test in an edited file as a ``changed test that catches nothing''.
+\end{itemize}
+All are fixed, and none changes which mutants run or how.

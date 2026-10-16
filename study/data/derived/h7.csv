@@ -1,0 +1,23 @@
+Project,Commit,Lines,Uncovered lines,Mutants,Killed,Survived,Uncovered,Verdict,Minutes
+attrs,48b8611c,5,0,17,15,1,0,gaps,2.0
+attrs,a572c3a4,1,0,6,1,0,0,verified,0.9
+attrs,af9c5109,2,0,0,0,0,0,incomplete,0.9
+more-itertools,da864da6,1,0,0,0,0,0,incomplete,2.3
+more-itertools,909b7033,1,0,0,0,0,0,incomplete,2.8
+more-itertools,0cfb9f50,3,0,8,8,0,0,verified,3.0
+dateutil,f2293200,1,0,0,0,0,0,incomplete,0.7
+toolz,d2eba037,4,0,4,4,0,0,verified,0.1
+toolz,a1e25cbd,48,17,52,38,6,8,gaps,0.2
+toolz,5eee30eb,6,0,0,0,0,0,incomplete,0.1
+marshmallow,902f99c4,1,0,0,0,0,0,incomplete,0.2
+marshmallow,ec2178c2,2,0,9,7,2,0,gaps,0.3
+marshmallow,cea3d44f,1,0,11,11,0,0,verified,0.5
+click,a1d87858,3,0,1,1,0,0,verified,0.6
+click,a6256bfb,24,0,32,30,2,0,gaps,0.8
+click,9835b0f7,21,2,48,25,19,4,gaps,0.9
+tomlkit,1bd7e3bc,1,0,0,0,0,0,incomplete,0.1
+tomlkit,94e62fbe,5,0,0,0,0,0,incomplete,0.3
+tomlkit,495a42ec,12,3,20,17,1,2,gaps,0.3
+cachetools,9976f1a8,1,0,0,0,0,0,incomplete,0.3
+cachetools,ffe21c44,1,0,2,2,0,0,verified,0.6
+cachetools,bcf9e817,4,0,6,5,0,0,verified,0.8

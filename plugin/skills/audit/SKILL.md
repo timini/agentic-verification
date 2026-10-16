@@ -58,10 +58,14 @@ minutes. The last stdout line is JSON with the report paths.
    3,300 executable lines; dateutil (about 3,600) and click (about 5,000) needed more.
 3. **Run the audit** and read `report.json` (full evidence) and `report.md`. See
    [reading the report](reference/report.md) for statuses, labels and the detection rate.
-4. **If the deep audit proposed removal candidates**, run `prune-check` on them with
+4. **If the deep audit proposed removal candidates**, treat them as an upper bound: in our
+   study such sets covered about 80% of each suite and every one lost kills on held-out mutants.
+   Run `prune-check` on them with
    `--from-run <run-dir>`, so the check uses mutants the set was not chosen from. Give it at
    least 10 minutes. Report its verdict: `refuted` (with the kills or lines lost) or `not refuted`
    (with the number of killed mutants checked and the upper bound it gives).
+   If it is refuted, keep the tests it names as sole killers, and say the rest is still
+   unproven. Never present a refuted set as removable.
 5. **Summarise under three headings**, findings in the report's order, each with its label,
    evidence and next validation step:
    - *Does it catch broken code?* Surviving mutants, pseudo-tested functions, deletable calls,

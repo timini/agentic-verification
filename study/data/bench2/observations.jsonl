@@ -27,3 +27,4 @@
 {"arm": "skill", "task": "toolz-d2eba03", "observation": "first verify run used the package directory as path and got no change"}
 {"arm": "skill", "task": "tomlkit-21a4942", "observation": "first verify run used the package directory as path and got no change"}
 {"arm": "skill", "task": "more-itertools-3eb4053", "observation": "first verify run used the package directory as path and got no change; declined to modify more.py to check its test against the old code; left one survivor with its reasoning for human review"}
+{"arm": "skill", "task": "click-047adef", "observation": "reported reverting core.py via git stash to run its tests against the old source, then restoring it"}

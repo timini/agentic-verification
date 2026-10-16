@@ -15,6 +15,7 @@ from pathlib import Path
 from bench2.common import DATA, repo, ROOT, build_repo, entry, file_hash, write_config
 from tsa import config
 from tsa.audit import run_audit
+from tsa.project import is_test_path
 from tsa.pytest_run import run_pytest
 from tsa.report.write import write
 
@@ -42,8 +43,10 @@ def restore_source(e, ws: Path, rev: str, files: list[str]) -> None:
 def touched_tests(ws: Path, e) -> list[str]:
     out = git(ws, "status", "--porcelain", "--untracked-files=all")
     files = [ln[3:].split(" -> ")[-1] for ln in out.splitlines()]
-    return sorted(f for f in files if f.endswith(".py") and not any(
-        f == s or f.startswith(s.rstrip("/") + "/") for s in e.source) and (ws / f).exists())
+    # A test file is any changed .py file outside production source; toolz keeps its tests inside
+    # its package, so test paths inside a source directory count as tests too.
+    return sorted(f for f in files if f.endswith(".py") and (ws / f).exists() and (is_test_path(f) or not any(
+        f == s or f.startswith(s.rstrip("/") + "/") for s in e.source)))
 
 
 def verify_run(ws: Path) -> dict:
@@ -114,7 +117,9 @@ if __name__ == "__main__":
     only = set(sys.argv[1:])
     out_path = DATA / "measurements.jsonl"
     done = set()
-    if out_path.exists():
+    force = {t for t in only if t.startswith("force:")}
+    only = {t.removeprefix("force:") for t in only}
+    if out_path.exists() and not force:
         done = {(r["arm"], r["task"]) for r in map(json.loads, out_path.read_text().splitlines())}
     with open(out_path, "a") as fh:
         for w in wss:

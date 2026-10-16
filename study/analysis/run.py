@@ -857,6 +857,20 @@ def bench2() -> None:
             e = _json.loads(l)
             times[(e["arm"], e["task"])][e["event"]] = e["ms"] if e["event"] == "duration" else e["ts"]
     tasks = sorted({t for a, t in last if a in ("skill", "baseline")})
+    wpath = STUDY / "data" / "bench2" / "workspaces.json"
+    before_ids = {(w["arm"], w["task"]): set(w["tests_before"]) for w in _json.loads(wpath.read_text())} if wpath.exists() else {}
+    for r in last.values():
+        if "tests_removed" not in r:
+            continue
+        # A node ID that disappeared only because its parameters changed (time-based IDs, or an
+        # updated expected value) is not a removed test: the test function still exists.
+        before = before_ids.get((r["arm"], r["task"]), set())
+        after = (before - set(r["tests_removed"])) | set(r["tests_added"])
+        after_bases = {t.split("[", 1)[0] for t in after}
+        r["tests_removed_real"] = [t for t in r["tests_removed"] if t.split("[", 1)[0] not in after_bases]
+        touched = set(r.get("test_files_touched", []))
+        r["left_failing"] = [t for t in r.get("failing_on_commit", [])
+                             if t in r["tests_added"] or t.split("::", 1)[0] in touched]
     rows = []
     for arm, key in (("skill", "Skill"), ("baseline", "Base"), ("upstream", "Up")):
         rs = [last[(arm, t)] for t in tasks if (arm, t) in last]
@@ -880,17 +894,24 @@ def bench2() -> None:
             macro(f"VOne{key}Lo", pct(lo))
             macro(f"VOne{key}Hi", pct(hi))
             macro(f"VThree{key}Source", sum(r["source_modified"] for r in rs))
-            macro(f"VThree{key}Removed", sum(bool(r["tests_removed"]) for r in rs))
-            macro(f"VFour{key}", sum(bool(r["failing_on_commit"]) for r in rs))
+            macro(f"VThree{key}Removed", sum(bool(r["tests_removed_real"]) for r in rs))
+            macro(f"VThree{key}IdChanges", sum(bool(r["tests_removed"]) and not r["tests_removed_real"] for r in rs))
+            macro(f"VFour{key}", sum(bool(r["left_failing"]) for r in rs))
             macro(f"VTests{key}", statistics.median([len(r["tests_added"]) for r in rs]) if rs else "n/a")
             macro(f"VMinutes{key}", f"{statistics.median(mins):.1f}" if mins else "n/a")
             row.update({"Detect real change": f"{det}/{len(rs)}", "Source edited": sum(r["source_modified"] for r in rs),
-                        "Tests removed": sum(bool(r["tests_removed"]) for r in rs),
-                        "Left failing": sum(bool(r["failing_on_commit"]) for r in rs),
+                        "Tests removed": sum(bool(r["tests_removed_real"]) for r in rs),
+                        "Left failing": sum(bool(r["left_failing"]) for r in rs),
                         "Median tests added": statistics.median([len(r["tests_added"]) for r in rs]) if rs else "--",
                         "Median minutes": f"{statistics.median(mins):.1f}" if mins else "--"})
         rows.append(row)
     macro("VTasks", len(tasks))
+    op = STUDY / "data" / "bench2" / "observations.jsonl"
+    obs = [_json.loads(l) for l in op.read_text().splitlines() if l.strip()] if op.exists() else []
+    for arm, key in (("skill", "Skill"), ("baseline", "Base")):
+        stashed = {o["task"] for o in obs if o["arm"] == arm and "stash" in o["observation"]}
+        macro(f"VInPlace{key}", len(stashed))
+    macro("VWrongPath", len({o["task"] for o in obs if o["arm"] == "skill" and "as path" in o["observation"]}))
     both = so = bo = neither = 0
     prow = []
     for t in tasks:
@@ -907,6 +928,9 @@ def bench2() -> None:
                      "Skill detection": f"{100 * s_['verify']['rate']:.0f}%" if s_["verify"]["rate"] is not None else "--",
                      "Baseline detection": f"{100 * b_['verify']['rate']:.0f}%" if b_["verify"]["rate"] is not None else "--",
                      "Upstream detection": f"{100 * up['verify']['rate']:.0f}%" if up and up["verify"]["rate"] is not None else "--"})
+    ups = [last[("upstream", t)] for t in tasks if ("upstream", t) in last and last[("upstream", t)]["verify"]["rate"] is not None]
+    macro("VUpWithSurvivors", sum(r["verify"]["rate"] < 1 for r in ups))
+    macro("VUpWithMutants", len(ups))
     macro("VPairBoth", both)
     macro("VPairSkillOnly", so)
     macro("VPairBaseOnly", bo)

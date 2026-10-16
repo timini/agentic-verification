@@ -1,0 +1,25 @@
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrrrrr}
+\toprule
+Task & Skill detects & Baseline detects & Skill detection & Baseline detection & Upstream detection \\
+\midrule
+attrs-48b8611 & yes & yes & 100\% & 100\% & 94\% \\
+attrs-af9c510 & yes & yes & -- & -- & -- \\
+cachetools-bcf9e81 & yes & yes & 100\% & 100\% & 100\% \\
+cachetools-c0fdf6a & yes & yes & 100\% & 100\% & 100\% \\
+click-047adef & yes & yes & 100\% & 100\% & 100\% \\
+click-f316d5c & yes & yes & 100\% & 100\% & 67\% \\
+marshmallow-72ac4a0 & yes & yes & 100\% & 90\% & 90\% \\
+marshmallow-ec2178c & yes & yes & 100\% & 100\% & 78\% \\
+more-itertools-3eb4053 & no & yes & 95\% & 95\% & 95\% \\
+more-itertools-f89d7a3 & yes & yes & 100\% & 100\% & 89\% \\
+tomlkit-21a4942 & yes & yes & 100\% & 81\% & 71\% \\
+tomlkit-8cd44f5 & yes & yes & 100\% & 100\% & 100\% \\
+toolz-5a7e078 & yes & yes & 100\% & 64\% & 64\% \\
+toolz-d2eba03 & yes & yes & 100\% & 100\% & 100\% \\
+\bottomrule
+\end{tabular}
+\caption{Verify benchmark per task.}
+\label{tab:bench2tasks}
+\end{table}

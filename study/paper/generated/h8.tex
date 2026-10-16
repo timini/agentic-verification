@@ -1,0 +1,15 @@
+\begin{table}[t]
+\centering\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lrrrrrrrrrr}
+\toprule
+Project & Tests & Candidates & Share & Time share & Held-out run & Killed & Kills lost & Lines lost & Weak tests & Verdict \\
+\midrule
+attrs & 1,377 & 1,100 & 80\% & 74\% & 1,019 & 601 & 63 & 0 & 62 & refuted \\
+marshmallow & 1,186 & 925 & 78\% & 67\% & 367 & 274 & 5 & 0 & 4 & refuted \\
+click & 1,990 & 1,680 & 84\% & 81\% & 983 & 765 & 60 & 0 & 8 & refuted \\
+\bottomrule
+\end{tabular}}
+\caption{H8: removal sets proposed by \texttt{deep} (20 minutes), checked by \texttt{prune-check} on mutants the audit did not use (20 minutes). \emph{Share}: candidates as a share of tests that passed every baseline run; \emph{Time share}: their summed duration as a share of the suite's; \emph{Kills lost}: held-out mutants killed only by candidates; \emph{Lines lost}: lines run only by candidates; \emph{Weak tests}: tests that ran against at least five valid mutants and killed none.}
+\label{tab:h8}
+\end{table}

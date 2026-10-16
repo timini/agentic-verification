@@ -1,0 +1,15 @@
+\begin{table}[t]
+\centering\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+Arm & Tasks & Pooled detection & Verified verdicts & Detect real change & Source edited & Tests removed & Left failing & Median tests added & Median minutes \\
+\midrule
+skill & 14 & 99\% & 12 & 13/14 & 0.00 & 0.00 & 0.00 & 5.00 & 1.6 \\
+baseline & 14 & 92\% & 9 & 14/14 & 0.00 & 0.00 & 0.00 & 5.50 & 0.4 \\
+upstream & 14 & 86\% & 5 & -- & -- & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}}
+\caption{Verify benchmark, measured independently on copies of the final workspaces with production source restored. \emph{Detect real change}: at least one test in a file the agent created or changed passes on the commit's source and fails on the parent's (V1). \emph{Pooled detection}: K/(K+S+U) over mutants on the changed lines (V2). \emph{upstream}: the developers' own tests for the commit, measured the same way.}
+\label{tab:bench2}
+\end{table}

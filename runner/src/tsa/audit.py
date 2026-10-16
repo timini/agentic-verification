@@ -768,12 +768,13 @@ def _derive_findings(st: AuditState) -> None:
                          evidence=[f"{w['test']} (0 of {w['mutants_run']})" for w in ef["weak_tests"][:20]]))
     if ef.get("removal_candidates"):
         n, sec, tot = len(ef["removal_candidates"]), ef["removal_seconds"], ef["suite_seconds"]
-        F.append(Finding("removal-candidates", "bloat", f"{n} tests add no kill and no coverage beyond the rest of the suite",
+        F.append(Finding("removal-candidates", "bloat", f"Upper bound: {n} tests add no kill and no coverage beyond the rest of the suite",
                          "inferred", 50, f"Removed together, they keep all {ef['kills_preserved']} observed kills and every "
                          f"covered line. Their test durations add up to {sec:.1f}s of {tot:.1f}s (an estimate; only paired "
                          "wall-time runs show the real saving). The set was chosen jointly, "
                          "because removing tests that are each redundant on their own can lose kills (study H4). It is "
-                         "fitted to this sample of mutants.",
+                         "fitted to this sample of mutants: in our study (H8) such sets lost 7.8% of kills on held-out "
+                         "mutants, and every one was refuted.",
                          "Run prune-check on this set before removing anything; it tries mutants the set was not "
                          "chosen from. Keep tests that document a requirement or a past bug.",
                          evidence=ef["removal_candidates"][:20],

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="570" viewBox="0 0 1280 570">
+<rect width="1280" height="570" rx="18" fill="#0d1117"/>
+<rect x="0" y="0" width="1280" height="44" rx="18" fill="#161b22"/>
+<rect x="0" y="26" width="1280" height="18" fill="#161b22"/>
+<circle cx="28" cy="22" r="7" fill="#ff5f56"/>
+<circle cx="50" cy="22" r="7" fill="#ffbd2e"/>
+<circle cx="72" cy="22" r="7" fill="#27c93f"/>
+<text x="640.0" y="28" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" fill="#9da7b3" font-weight="400" text-anchor="middle" xml:space="preserve">verify on a new four-line function: three rounds until the tests catch every mutant</text>
+<text x="40" y="92" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#9da7b3" font-weight="400" text-anchor="start" xml:space="preserve">$ agentic-verification verify      # tests: tax(100) == 20, tax(15) == 3, tax(0) == 0</text>
+<text x="40" y="122" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#f85149" font-weight="700" text-anchor="start" xml:space="preserve">Verdict: gaps   8 of 12 mutants killed, 1 changed line never run</text>
+<text x="40" y="152" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#f0883e" font-weight="400" text-anchor="start" xml:space="preserve">  orders.py:54  total * 2 // 10  -&gt;  total * 2 / 10   survived: 20.0 == 20 passes too</text>
+<text x="40" y="182" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#f0883e" font-weight="400" text-anchor="start" xml:space="preserve">  orders.py:53  raise ValueError(...)                 never run by a test</text>
+<text x="40" y="212" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#e6edf3" font-weight="400" text-anchor="start" xml:space="preserve"></text>
+<text x="40" y="242" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#3fb950" font-weight="400" text-anchor="start" xml:space="preserve">+ assert isinstance(orders.tax(15), int)</text>
+<text x="40" y="272" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#3fb950" font-weight="400" text-anchor="start" xml:space="preserve">+ with pytest.raises(ValueError, match=&quot;negative total&quot;): orders.tax(-1)</text>
+<text x="40" y="302" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#9da7b3" font-weight="400" text-anchor="start" xml:space="preserve">$ agentic-verification replay --mutant 37c3b60f --all      killed_now: true</text>
+<text x="40" y="332" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#e6edf3" font-weight="400" text-anchor="start" xml:space="preserve"></text>
+<text x="40" y="362" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#f85149" font-weight="700" text-anchor="start" xml:space="preserve">Verdict: gaps   11 of 12 mutants killed</text>
+<text x="40" y="392" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#f0883e" font-weight="400" text-anchor="start" xml:space="preserve">  orders.py:53  &quot;negative total&quot;  -&gt;  &quot;XXnegative totalXX&quot;   survived: match= searches</text>
+<text x="40" y="422" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#e6edf3" font-weight="400" text-anchor="start" xml:space="preserve"></text>
+<text x="40" y="452" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#3fb950" font-weight="400" text-anchor="start" xml:space="preserve">+ match=&quot;^negative total$&quot;</text>
+<text x="40" y="482" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#e6edf3" font-weight="400" text-anchor="start" xml:space="preserve"></text>
+<text x="40" y="512" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" fill="#3fb950" font-weight="700" text-anchor="start" xml:space="preserve">Verdict: verified   12 of 12 mutants killed, every changed line run</text>
+</svg>

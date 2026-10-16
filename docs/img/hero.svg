@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+<rect width="1280" height="640" rx="24" fill="#0d1117"/>
+<circle cx="76" cy="78" r="7" fill="#9da7b3"/>
+<circle cx="98" cy="78" r="7" fill="#9da7b3"/>
+<circle cx="120" cy="78" r="7" fill="#9da7b3"/>
+<circle cx="76" cy="100" r="7" fill="#9da7b3"/>
+<circle cx="98" cy="100" r="7" fill="#9da7b3"/>
+<circle cx="120" cy="100" r="7" fill="none" stroke="#f0883e" stroke-width="3"/>
+<circle cx="76" cy="122" r="7" fill="#9da7b3"/>
+<circle cx="98" cy="122" r="7" fill="#9da7b3"/>
+<circle cx="120" cy="122" r="7" fill="#9da7b3"/>
+<text x="150" y="100" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="44" fill="#e6edf3" font-weight="700" text-anchor="start" xml:space="preserve">Agentic Verification</text>
+<text x="150" y="136" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="21" fill="#9da7b3" font-weight="400" text-anchor="start" xml:space="preserve">Evidence that your tests would catch it, for Claude Code on Python and pytest.</text>
+<rect x="64" y="184" width="560" height="196" rx="14" fill="#161b22" stroke="#30363d"/>
+<text x="92" y="228" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="28" fill="#f0883e" font-weight="700" text-anchor="start" xml:space="preserve">/verify</text>
+<text x="232" y="228" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="24" fill="#e6edf3" font-weight="600" text-anchor="start" xml:space="preserve">your change</text>
+<text x="92" y="274" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#e6edf3" font-weight="400" text-anchor="start" xml:space="preserve">Runs every mutant of the lines you changed.</text>
+<text x="92" y="308" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#e6edf3" font-weight="400" text-anchor="start" xml:space="preserve">Writes tests until the tests catch them.</text>
+<text x="92" y="342" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#e6edf3" font-weight="400" text-anchor="start" xml:space="preserve">Hands back a verdict and evidence, not a diff to read.</text>
+<rect x="648" y="184" width="560" height="196" rx="14" fill="#161b22" stroke="#30363d"/>
+<text x="676" y="228" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="28" fill="#f0883e" font-weight="700" text-anchor="start" xml:space="preserve">/audit</text>
+<text x="796" y="228" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="24" fill="#e6edf3" font-weight="600" text-anchor="start" xml:space="preserve">your test suite</text>
+<text x="676" y="274" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#e6edf3" font-weight="400" text-anchor="start" xml:space="preserve">Would it notice broken code?</text>
+<text x="676" y="308" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#e6edf3" font-weight="400" text-anchor="start" xml:space="preserve">Is it fast and stable enough to run on every change?</text>
+<text x="676" y="342" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#e6edf3" font-weight="400" text-anchor="start" xml:space="preserve">Which tests could go? Checked on fresh mutants.</text>
+<text x="64" y="470" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="50" fill="#e6edf3" font-weight="700" text-anchor="start" xml:space="preserve">46%</text>
+<text x="64" y="506" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" fill="#9da7b3" font-weight="400" text-anchor="start" xml:space="preserve">of recent commits we could judge</text>
+<text x="64" y="531" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" fill="#9da7b3" font-weight="400" text-anchor="start" xml:space="preserve">in mature libraries left mutants</text>
+<text x="64" y="556" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" fill="#9da7b3" font-weight="400" text-anchor="start" xml:space="preserve">of the changed lines uncaught</text>
+<text x="456" y="470" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="50" fill="#e6edf3" font-weight="700" text-anchor="start" xml:space="preserve">71%</text>
+<text x="456" y="506" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" fill="#9da7b3" font-weight="400" text-anchor="start" xml:space="preserve">of calls no test notices sit in</text>
+<text x="456" y="531" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" fill="#9da7b3" font-weight="400" text-anchor="start" xml:space="preserve">functions whose deletion</text>
+<text x="456" y="556" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" fill="#9da7b3" font-weight="400" text-anchor="start" xml:space="preserve">the tests do catch</text>
+<text x="848" y="470" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="50" fill="#e6edf3" font-weight="700" text-anchor="start" xml:space="preserve">99% vs 92%</text>
+<text x="848" y="506" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" fill="#9da7b3" font-weight="400" text-anchor="start" xml:space="preserve">of a change&#x27;s mutants caught by</text>
+<text x="848" y="531" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" fill="#9da7b3" font-weight="400" text-anchor="start" xml:space="preserve">Claude&#x27;s tests with the skill</text>
+<text x="848" y="556" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" fill="#9da7b3" font-weight="400" text-anchor="start" xml:space="preserve">and without (developers: 86%)</text>
+<text x="1216" y="610" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" fill="#9da7b3" font-weight="400" text-anchor="end" xml:space="preserve">Pre-registered study on 8 open-source projects. Paper, data and code in the repository.</text>
+</svg>

@@ -1,0 +1,4 @@
+Arm,Tasks,Pooled detection,Verified verdicts,Detect real change,Source edited,Tests removed,Left failing,Median tests added,Median minutes
+skill,14,99%,12,13/14,0.0,0.0,0.0,5.0,1.6
+baseline,14,92%,9,14/14,0.0,0.0,0.0,5.5,0.4
+upstream,14,86%,5,,,,,,
