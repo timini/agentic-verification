@@ -1,0 +1,39 @@
+You are working in the Python repository at /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/marshmallow-72ac4a0. Use its virtual environment, /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/marshmallow-72ac4a0/.venv/bin/python, which has pytest installed; the tests are in tests.
+
+The working tree has an uncommitted change to production code; `git diff` shows it. The change is described by its commit message:
+
+<commit-message>
+Reject booleans in from_timestamp_ms, consistent with from_timestamp (#2904)
+
+* Reject booleans in from_timestamp_ms, consistent with from_timestamp
+
+from_timestamp explicitly rejects True/False before converting to float,
+but from_timestamp_ms calls float(value) first, converting booleans to
+1.0/0.0 before from_timestamp ever sees them. This means the boolean
+check in from_timestamp is bypassed.
+
+Add the same boolean guard to from_timestamp_ms so that
+DateTime(format="timestamp_ms") rejects booleans just like
+DateTime(format="timestamp") does.
+
+* Add tests for from_timestamp_ms boolean rejection
+
+* [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+for more information, see https://pre-commit.ci
+
+* Update changelog
+
+---------
+
+Co-authored-by: Jared Deckard <jared@shademaps.com>
+Co-authored-by: pre-commit-ci[bot] <66853113+pre-commit-ci[bot]@users.noreply.github.com>
+Co-authored-by: Steven Loria <git@stevenloria.com>
+</commit-message>
+
+Your task: make sure this change is properly verified by the test suite. Add or change tests as you see fit. Do not modify production source files (src/marshmallow/utils.py). Do not commit, and do not change anything outside /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/marshmallow-72ac4a0. Aim for about 20 minutes of work.
+
+When you are done, end your reply with a JSON block:
+```json
+{"tests_added": ["<pytest node id>", "..."], "summary": "<one or two sentences>"}
+```

@@ -1,0 +1,29 @@
+{"arm": "baseline", "task": "attrs-af9c510", "observation": "reported stashing the production change (git stash) to run its tests against the old source, then restoring it"}
+{"arm": "baseline", "task": "more-itertools-f89d7a3", "observation": "reported stashing the production change to run its tests against the old source, then restoring it"}
+{"arm": "baseline", "task": "toolz-d2eba03", "observation": "reported stashing the production change to run its tests against the old source, then restoring it"}
+{"arm": "skill", "task": "attrs-af9c510", "observation": "reported stashing the production change to run its tests against the old source, then restoring it"}
+{"arm": "baseline", "task": "marshmallow-ec2178c", "observation": "reported stashing the production change to run its tests against the old source, then restoring it"}
+{"arm": "skill", "task": "attrs-af9c510", "observation": "runner gave verdict verified with zero mutants on the changed lines (decorated function); runner defect, fixed after the benchmark"}
+{"arm": "skill", "task": "toolz-d2eba03", "observation": "verdict gaps only because a test failing on the pristine checkout (test_package.py::test_has_version) made the suite not green; runner defect, fixed after the benchmark"}
+{"arm": "skill", "task": "toolz-5a7e078", "observation": "same pre-existing test_has_version failure kept the verdict at gaps after 11 of 11 mutants were killed"}
+{"arm": "skill", "task": "marshmallow-ec2178c", "observation": "first verify run used a subdirectory as path and got no change; reran with the project root"}
+{"arm": "baseline", "task": "marshmallow-72ac4a0", "observation": "reported stashing the production change to run its tests against the old source, then restoring it"}
+{"arm": "baseline", "task": "click-f316d5c", "observation": "reported stashing the production change to run its tests against the old source, then restoring it"}
+{"arm": "skill", "task": "more-itertools-f89d7a3", "observation": "first verify run used a subdirectory as path and got no change; reran with the project root"}
+{"arm": "skill", "task": "marshmallow-72ac4a0", "observation": "first verify run used a subdirectory as path; reran with the project root"}
+{"arm": "skill", "task": "click-f316d5c", "observation": "change-weak-tests finding listed 34 existing tests because it counted every test in an edited test file; runner defect, fixed after the benchmark"}
+{"arm": "baseline", "task": "tomlkit-8cd44f5", "observation": "reported stashing the production change to run its tests against the old source, then restoring it"}
+{"arm": "baseline", "task": "click-047adef", "observation": "reported stashing the production change to run its tests against the old source, then restoring it"}
+{"arm": "skill", "task": "tomlkit-8cd44f5", "observation": "toml-test fixtures missing during its run; it temporarily added collect_ignore to tests/conftest.py to get a verify run, then restored the file"}
+{"arm": "skill", "task": "tomlkit-21a4942", "observation": "toml-test fixtures missing during its run; it overwrote the harness test-suite-audit.toml with an --ignore for the conformance tests and then deleted it; the harness file was restored before measurement"}
+{"arm": "skill", "task": "click-047adef", "observation": "4 of 8 mutants timed out and the runner message counted them among killed; message fixed after the benchmark"}
+{"arm": "baseline", "task": "cachetools-bcf9e81", "observation": "reported stashing the production change to run its tests against the old source, then restoring it"}
+{"arm": "baseline", "task": "more-itertools-3eb4053", "observation": "reported stashing the production change to run its tests against the old source, then restoring it"}
+{"arm": "baseline", "task": "cachetools-c0fdf6a", "observation": "reported stashing the production change to run its tests against the old source, then restoring it"}
+{"arm": "skill", "task": "cachetools-c0fdf6a", "observation": "reported stashing the production change to run its tests against the old source, then restoring it"}
+{"arm": "skill", "task": "cachetools-bcf9e81", "observation": "reported stashing the production change; first verify run used src as path; reported pytest-randomly missing although it is installed in the workspace venv"}
+{"arm": "skill", "task": "attrs-48b8611", "observation": "first verify run used src as path"}
+{"arm": "skill", "task": "attrs-af9c510", "observation": "first verify run passed a file as path"}
+{"arm": "skill", "task": "toolz-d2eba03", "observation": "first verify run used the package directory as path and got no change"}
+{"arm": "skill", "task": "tomlkit-21a4942", "observation": "first verify run used the package directory as path and got no change"}
+{"arm": "skill", "task": "more-itertools-3eb4053", "observation": "first verify run used the package directory as path and got no change; declined to modify more.py to check its test against the old code; left one survivor with its reasoning for human review"}

@@ -1,0 +1,14 @@
+You are working in the Python repository at /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/more-itertools-3eb4053. Use its virtual environment, /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/more-itertools-3eb4053/.venv/bin/python, which has pytest installed; the tests are in tests.
+
+The working tree has an uncommitted change to production code; `git diff` shows it. The change is described by its commit message:
+
+<commit-message>
+Bound zero-cache seekable lookahead storage
+</commit-message>
+
+Your task: make sure this change is properly verified by the test suite. Add or change tests as you see fit. Do not modify production source files (more_itertools/more.py). Do not commit, and do not change anything outside /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/more-itertools-3eb4053. Aim for about 20 minutes of work.
+
+When you are done, end your reply with a JSON block:
+```json
+{"tests_added": ["<pytest node id>", "..."], "summary": "<one or two sentences>"}
+```

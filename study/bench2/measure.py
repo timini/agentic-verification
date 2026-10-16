@@ -12,7 +12,7 @@ import tempfile
 from dataclasses import replace
 from pathlib import Path
 
-from bench2.common import DATA, ROOT, build_repo, entry, file_hash, write_config
+from bench2.common import DATA, repo, ROOT, build_repo, entry, file_hash, write_config
 from tsa import config
 from tsa.audit import run_audit
 from tsa.pytest_run import run_pytest
@@ -26,7 +26,7 @@ def git(cwd, *args) -> str:
 
 
 def show(e, rev, path) -> bytes | None:
-    r = subprocess.run(["git", "show", f"{rev}:{path}"], cwd=e.dir, capture_output=True)
+    r = subprocess.run(["git", "show", f"{rev}:{path}"], cwd=repo(e), capture_output=True)
     return r.stdout if r.returncode == 0 else None
 
 
@@ -103,7 +103,7 @@ def reference(task: str, project: str, commit: str, parent: str) -> dict:
     e = entry(project)
     with tempfile.TemporaryDirectory(prefix="m2ref-") as tmp:
         ws = Path(tmp) / "ws"
-        names = git(e.dir, "diff", "--name-only", parent, commit).split()
+        names = git(repo(e), "diff", "--name-only", parent, commit).split()
         build_repo(e, ws, parent, commit, names)
         write_config(e, ws, e.venv / "bin" / "python")
         return {"arm": "upstream", "project": project, "task": task, "commit": commit, "verify": verify_run(ws)}

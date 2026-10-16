@@ -1,0 +1,26 @@
+You are working in the Python repository at /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/attrs-af9c510. Use its virtual environment, /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/attrs-af9c510/.venv/bin/python, which has pytest installed; the tests are in tests.
+
+The working tree has an uncommitted change to production code; `git diff` shows it. The change is described by its commit message:
+
+<commit-message>
+Fix validators.disabled() to save/restore state on nesting (#1513)
+
+* Fix validators.disabled() to save/restore previous state on nesting
+
+* Add news fragment
+
+* Add test
+
+* Add versionchanged tag
+
+---------
+
+Co-authored-by: Hynek Schlawack <hs@ox.cx>
+</commit-message>
+
+Your task: make sure this change is properly verified by the test suite. Add or change tests as you see fit. Do not modify production source files (src/attr/validators.py). Do not commit, and do not change anything outside /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/attrs-af9c510. Aim for about 20 minutes of work.
+
+When you are done, end your reply with a JSON block:
+```json
+{"tests_added": ["<pytest node id>", "..."], "summary": "<one or two sentences>"}
+```

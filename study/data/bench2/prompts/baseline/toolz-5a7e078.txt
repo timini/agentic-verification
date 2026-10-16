@@ -1,0 +1,16 @@
+You are working in the Python repository at /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/toolz-5a7e078. Use its virtual environment, /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/toolz-5a7e078/.venv/bin/python, which has pytest installed; the tests are in toolz/tests.
+
+The working tree has an uncommitted change to production code; `git diff` shows it. The change is described by its commit message:
+
+<commit-message>
+Raise in partition_all when length is invalid (#603)
+
+Sometimes an iterable's `__len__` is incorrect, which can lead to bad output from `partition_all`. We now raise an exception (when we previously output bad data) in these cases so the user can more easily find the invalid iterable and fix it. Fixes #602.
+</commit-message>
+
+Your task: make sure this change is properly verified by the test suite. Add or change tests as you see fit. Do not modify production source files (toolz/itertoolz.py). Do not commit, and do not change anything outside /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/toolz-5a7e078. Aim for about 20 minutes of work.
+
+When you are done, end your reply with a JSON block:
+```json
+{"tests_added": ["<pytest node id>", "..."], "summary": "<one or two sentences>"}
+```

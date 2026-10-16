@@ -14,6 +14,7 @@ from pathlib import Path
 
 from coverage.python import PythonParser
 
+from bench2.common import repo
 from harness import corpus
 from harness.corpus import STUDY, WORK
 from tsa.project import is_test_path
@@ -29,14 +30,14 @@ EXCLUDE = r"#\s*(pragma|PRAGMA)[:\s]?\s*(no|NO)\s*(cover|COVER)"
 
 
 def git(e, *args, check=True) -> str:
-    r = subprocess.run(["git", *args], cwd=e.dir, capture_output=True, text=True)
+    r = subprocess.run(["git", *args], cwd=repo(e), capture_output=True, text=True)
     if check and r.returncode != 0:
         raise RuntimeError(f"git {' '.join(args)}: {r.stderr[:300]}")
     return r.stdout
 
 
 def show(e, rev: str, path: str) -> str | None:
-    r = subprocess.run(["git", "show", f"{rev}:{path}"], cwd=e.dir, capture_output=True, text=True)
+    r = subprocess.run(["git", "show", f"{rev}:{path}"], cwd=repo(e), capture_output=True, text=True)
     return r.stdout if r.returncode == 0 else None
 
 
@@ -150,8 +151,11 @@ def fault_check(e, c: dict) -> dict:
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    result = {}
+    path = OUT / "commits.json"
+    result = json.loads(path.read_text()) if path.exists() else {}
     for e in corpus.load(sys.argv[1:] or None):
+        if e.name in result:
+            continue
         revs = git(e, "rev-list", "--no-merges", "-n", str(MAX_COMMITS), e.sha).split()
         change, fault, skips = [], [], []
         for rev in revs:
@@ -174,7 +178,7 @@ def main() -> None:
             print(e.name, rev[:10], fc.get("why") or "fault commit", flush=True)
         result[e.name] = {"scanned": len(revs), "change": change, "fault": fault, "fault_skips": skips}
         print(e.name, len(change), "change,", len(fault), "fault", flush=True)
-    (OUT / "commits.json").write_text(json.dumps(result, indent=2))
+        path.write_text(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

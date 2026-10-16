@@ -1,0 +1,21 @@
+You are working in the Python repository at /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/cachetools-bcf9e81. Use its virtual environment, /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/cachetools-bcf9e81/.venv/bin/python, which has pytest installed; the tests are in tests.
+
+The working tree has an uncommitted change to production code; `git diff` shows it. The change is described by its commit message:
+
+<commit-message>
+Fix #423: Detect an empty RRCache before calling choice.
+
+RRCache.popitem() relied on the choice function raising IndexError on an
+empty sequence, which is what the default random.choice does. Any other
+valid choice function raised its own exception instead of KeyError, even
+though the documented contract only requires choice to handle non-empty
+sequences. The other cache classes each detect emptiness on their own
+structure first.
+</commit-message>
+
+Your task: make sure this change is properly verified by the test suite. Add or change tests as you see fit. Do not modify production source files (src/cachetools/__init__.py). Do not commit, and do not change anything outside /Users/timrichardson/Documents/projects/personal/test-suite-auditor/study/work/bench2/baseline/cachetools-bcf9e81. Aim for about 20 minutes of work.
+
+When you are done, end your reply with a JSON block:
+```json
+{"tests_added": ["<pytest node id>", "..."], "summary": "<one or two sentences>"}
+```

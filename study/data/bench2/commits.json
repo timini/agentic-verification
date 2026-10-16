@@ -1,0 +1,630 @@
+{
+  "attrs": {
+    "scanned": 300,
+    "change": [
+      {
+        "commit": "48b8611c27779811d161200e17de8da24aae7feb",
+        "parent": "3a68d4913221abc6f8ad3be50937f7ae49300a98",
+        "subject": "Add instance support to attrs.fields() (#1529)",
+        "source_files": [
+          "src/attr/_make.py"
+        ],
+        "test_files": [
+          "tests/test_make.py"
+        ],
+        "exec_changed": 5,
+        "inside_existing": true
+      },
+      {
+        "commit": "a572c3a4c558a8b9b48cf989fcd956ab1a279439",
+        "parent": "af9c510912ce604a94896cc35c27368d5baf6ae6",
+        "subject": "Allow field(on_setattr=NO_OP) on frozen classes",
+        "source_files": [
+          "src/attr/_make.py"
+        ],
+        "test_files": [
+          "tests/test_setattr.py"
+        ],
+        "exec_changed": 1,
+        "inside_existing": true
+      },
+      {
+        "commit": "af9c510912ce604a94896cc35c27368d5baf6ae6",
+        "parent": "ab7f8b2f4c0f747d5b1575247ce35e5adaad182e",
+        "subject": "Fix validators.disabled() to save/restore state on nesting (#1513)",
+        "source_files": [
+          "src/attr/validators.py"
+        ],
+        "test_files": [
+          "tests/test_validators.py"
+        ],
+        "exec_changed": 2,
+        "inside_existing": true
+      }
+    ],
+    "fault": [
+      {
+        "commit": "48b8611c27779811d161200e17de8da24aae7feb",
+        "parent": "3a68d4913221abc6f8ad3be50937f7ae49300a98",
+        "subject": "Add instance support to attrs.fields() (#1529)",
+        "source_files": [
+          "src/attr/_make.py"
+        ],
+        "test_files": [
+          "tests/test_make.py"
+        ],
+        "exec_changed": 5,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 275,
+        "detecting": [
+          "tests/test_make.py::TestFields::test_handler_non_attrs_instance",
+          "tests/test_make.py::TestFields::test_instance"
+        ]
+      },
+      {
+        "commit": "af9c510912ce604a94896cc35c27368d5baf6ae6",
+        "parent": "ab7f8b2f4c0f747d5b1575247ce35e5adaad182e",
+        "subject": "Fix validators.disabled() to save/restore state on nesting (#1513)",
+        "source_files": [
+          "src/attr/validators.py"
+        ],
+        "test_files": [
+          "tests/test_validators.py"
+        ],
+        "exec_changed": 2,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 163,
+        "detecting": [
+          "tests/test_validators.py::TestDisableValidators::test_disabled_ctx_nested"
+        ]
+      }
+    ],
+    "fault_skips": []
+  },
+  "more-itertools": {
+    "scanned": 300,
+    "change": [
+      {
+        "commit": "da864da6d8beaa49d693b719cbc21a5d88dfb475",
+        "parent": "737c261c21271e1a6eb949f7d188297bebe8b125",
+        "subject": "Version 11.2.1: Include additional files in sdist",
+        "source_files": [
+          "more_itertools/__init__.py"
+        ],
+        "test_files": [],
+        "exec_changed": 1,
+        "inside_existing": false
+      },
+      {
+        "commit": "909b70336ce229088bbc253d300190c99fb8411a",
+        "parent": "6ad55cbedd2cd722a9c029e5823177622910771a",
+        "subject": "Bump version to 11.2.0",
+        "source_files": [
+          "more_itertools/__init__.py"
+        ],
+        "test_files": [],
+        "exec_changed": 1,
+        "inside_existing": false
+      },
+      {
+        "commit": "0cfb9f501da3e686d1cc177503724c507d9e9179",
+        "parent": "5236f040f5907ae9974e7abf33ed3922c764114f",
+        "subject": "Micro-optimization for partition",
+        "source_files": [
+          "more_itertools/recipes.py"
+        ],
+        "test_files": [],
+        "exec_changed": 3,
+        "inside_existing": true
+      }
+    ],
+    "fault": [
+      {
+        "commit": "f89d7a3331ba6b5421273e556c0a738e3dd1dd35",
+        "parent": "790bb0bb2c03e7a07282e5f16f4b1fde35b8fcf5",
+        "subject": "Issue 1304: make ichunked match chunked for n=0 and negative n",
+        "source_files": [
+          "more_itertools/more.py"
+        ],
+        "test_files": [
+          "tests/test_more.py"
+        ],
+        "exec_changed": 4,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 619,
+        "detecting": [
+          "tests/test_more.py::IchunkedTests::test_negative",
+          "tests/test_more.py::IchunkedTests::test_zero_nonempty"
+        ]
+      },
+      {
+        "commit": "3eb4053e1aacac53853f6e0abae556f280726f01",
+        "parent": "b5e3886a37209bb880f17d82fbf4ba00ece0e41e",
+        "subject": "Bound zero-cache seekable lookahead storage",
+        "source_files": [
+          "more_itertools/more.py"
+        ],
+        "test_files": [
+          "tests/test_seekable_memory.py"
+        ],
+        "exec_changed": 3,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 1,
+        "detecting": [
+          "tests/test_seekable_memory.py::SeekableMemoryTests::test_repeated_zero_cache_peek_has_bounded_memory"
+        ]
+      }
+    ],
+    "fault_skips": []
+  },
+  "dateutil": {
+    "scanned": 300,
+    "change": [
+      {
+        "commit": "f2293200747fb03d56c6c5997bfebeabe703576f",
+        "parent": "b04edc08aa3559063b3b097f437941d8c4b84aba",
+        "subject": "avoid deprecated utcfromtimestamp",
+        "source_files": [
+          "src/dateutil/tz/tz.py"
+        ],
+        "test_files": [],
+        "exec_changed": 1,
+        "inside_existing": false
+      }
+    ],
+    "fault": [],
+    "fault_skips": []
+  },
+  "toolz": {
+    "scanned": 300,
+    "change": [
+      {
+        "commit": "d2eba0374a452c2b18fe188b04527e22bda3548c",
+        "parent": "55ce42dc3b6f786ed9d4e38633cc5cfe3622a526",
+        "subject": "Fix interpose([]) raising StopIteration (#635)",
+        "source_files": [
+          "toolz/itertoolz.py"
+        ],
+        "test_files": [
+          "toolz/tests/test_itertoolz.py"
+        ],
+        "exec_changed": 4,
+        "inside_existing": true
+      },
+      {
+        "commit": "a1e25cbd2c398b534f0736f5838e416202b0cb28",
+        "parent": "80ddcb3e104eda18838a2e7f7a10b9dc4e8086a8",
+        "subject": "Expose combined `__annotations__` on composed functions (#496) (#634)",
+        "source_files": [
+          "toolz/functoolz.py"
+        ],
+        "test_files": [
+          "toolz/tests/test_functoolz.py"
+        ],
+        "exec_changed": 48,
+        "inside_existing": false
+      },
+      {
+        "commit": "5eee30eb6c35aedffe33ff685b44b9d704cf278a",
+        "parent": "5a7e078c941c990dcaca53ac6920e5d5c0b1475f",
+        "subject": "Use yield from. (#550)",
+        "source_files": [
+          "toolz/itertoolz.py"
+        ],
+        "test_files": [],
+        "exec_changed": 6,
+        "inside_existing": true
+      }
+    ],
+    "fault": [
+      {
+        "commit": "d2eba0374a452c2b18fe188b04527e22bda3548c",
+        "parent": "55ce42dc3b6f786ed9d4e38633cc5cfe3622a526",
+        "subject": "Fix interpose([]) raising StopIteration (#635)",
+        "source_files": [
+          "toolz/itertoolz.py"
+        ],
+        "test_files": [
+          "toolz/tests/test_itertoolz.py"
+        ],
+        "exec_changed": 4,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 51,
+        "detecting": [
+          "toolz/tests/test_itertoolz.py::test_interpose_empty"
+        ]
+      },
+      {
+        "commit": "5a7e078c941c990dcaca53ac6920e5d5c0b1475f",
+        "parent": "1fb2b9f1b69ab664a264944f4eafc290acce127d",
+        "subject": "Raise in partition_all when length is invalid (#603)",
+        "source_files": [
+          "toolz/itertoolz.py"
+        ],
+        "test_files": [
+          "toolz/tests/test_itertoolz.py"
+        ],
+        "exec_changed": 4,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 50,
+        "detecting": [
+          "toolz/tests/test_itertoolz.py::test_partition_all"
+        ]
+      }
+    ],
+    "fault_skips": []
+  },
+  "marshmallow": {
+    "scanned": 300,
+    "change": [
+      {
+        "commit": "902f99c4151d1f0c4c3b8e8dfbafc7b6a76aeaa6",
+        "parent": "3207be31474530f7c0685dfbd7b4faca5b35fbf5",
+        "subject": "Fix URL validator rejecting a fragment after an empty path (#3016)",
+        "source_files": [
+          "src/marshmallow/validate.py"
+        ],
+        "test_files": [
+          "tests/test_validate.py"
+        ],
+        "exec_changed": 1,
+        "inside_existing": false
+      },
+      {
+        "commit": "ec2178c26b1a0b46e162a48a4aa5fd9840c0de59",
+        "parent": "3265c13945a9533f9a3ade8d47eb9b32412c4c27",
+        "subject": "Improve the allow_none default for by_value enums",
+        "source_files": [
+          "src/marshmallow/fields.py"
+        ],
+        "test_files": [
+          "tests/base.py",
+          "tests/test_deserialization.py"
+        ],
+        "exec_changed": 2,
+        "inside_existing": true
+      },
+      {
+        "commit": "cea3d44f40683832b88b792b84f4a91be032f7ad",
+        "parent": "7bb19f0fdce323a8b216245bf01810e35ed42f95",
+        "subject": "Simplify use of self.opts.index_errors in _deserialize (#2988)",
+        "source_files": [
+          "src/marshmallow/schema.py"
+        ],
+        "test_files": [],
+        "exec_changed": 1,
+        "inside_existing": true
+      }
+    ],
+    "fault": [
+      {
+        "commit": "ec2178c26b1a0b46e162a48a4aa5fd9840c0de59",
+        "parent": "3265c13945a9533f9a3ade8d47eb9b32412c4c27",
+        "subject": "Improve the allow_none default for by_value enums",
+        "source_files": [
+          "src/marshmallow/fields.py"
+        ],
+        "test_files": [
+          "tests/base.py",
+          "tests/test_deserialization.py"
+        ],
+        "exec_changed": 2,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 393,
+        "detecting": [
+          "tests/test_deserialization.py::TestFieldDeserialization::test_enum_by_value_allow_none_default"
+        ]
+      },
+      {
+        "commit": "72ac4a04208ff24df0a9694d9b03b78b1c5a2e6a",
+        "parent": "024b5d09e9f026f0f96d220e243be69346687ce0",
+        "subject": "Reject booleans in from_timestamp_ms, consistent with from_timestamp (#2904)",
+        "source_files": [
+          "src/marshmallow/utils.py"
+        ],
+        "test_files": [
+          "tests/test_deserialization.py",
+          "tests/test_utils.py"
+        ],
+        "exec_changed": 2,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 409,
+        "detecting": [
+          "tests/test_deserialization.py::TestFieldDeserialization::test_boolean_timestamp_field_deserialization[False-timestamp_ms]",
+          "tests/test_deserialization.py::TestFieldDeserialization::test_boolean_timestamp_field_deserialization[True-timestamp_ms]",
+          "tests/test_utils.py::test_from_timestamp_ms_rejects_booleans[False]",
+          "tests/test_utils.py::test_from_timestamp_ms_rejects_booleans[True]"
+        ]
+      }
+    ],
+    "fault_skips": []
+  },
+  "click": {
+    "scanned": 300,
+    "change": [
+      {
+        "commit": "a1d87858abd77fa8e3ffc204670ccd75b96c4781",
+        "parent": "2103e157683c5e4cadc8ee1838df526a54bde9a4",
+        "subject": "Add support of `pathlib.Path` to `edit`",
+        "source_files": [
+          "src/click/_termui_impl.py",
+          "src/click/termui.py"
+        ],
+        "test_files": [
+          "tests/test_termui.py",
+          "tests/typing/typing_edit.py"
+        ],
+        "exec_changed": 3,
+        "inside_existing": false
+      },
+      {
+        "commit": "a6256bfb5971d5e58585fe7b6c656134e1ade5a4",
+        "parent": "61b69e967e525bd502f5bf42def4d551e761fe0e",
+        "subject": "Forwards all user's parameters set in `PAGER`",
+        "source_files": [
+          "src/click/_termui_impl.py"
+        ],
+        "test_files": [
+          "tests/test_termui.py"
+        ],
+        "exec_changed": 24,
+        "inside_existing": false
+      },
+      {
+        "commit": "9835b0f7612d1b1ea180a975fd6d24cf16791ba8",
+        "parent": "f36d58bbd7f188178de2d4fe1d0292c510375ca7",
+        "subject": "Resolve the pager command once, in `_pager_contextmanager`",
+        "source_files": [
+          "src/click/_termui_impl.py"
+        ],
+        "test_files": [],
+        "exec_changed": 21,
+        "inside_existing": false
+      }
+    ],
+    "fault": [
+      {
+        "commit": "f316d5cb3aa89b57c14aee54da6ac9062ac5bec4",
+        "parent": "8b44edfff7d9a6c895fa804148c16b3a0bc9efb5",
+        "subject": "Land the progress bar on its final position",
+        "source_files": [
+          "src/click/_termui_impl.py"
+        ],
+        "test_files": [
+          "tests/test_termui.py"
+        ],
+        "exec_changed": 4,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 237,
+        "detecting": [
+          "tests/test_termui.py::test_progressbar_lands_on_final_position[iterate-25]",
+          "tests/test_termui.py::test_progressbar_lands_on_final_position[iterate-3]",
+          "tests/test_termui.py::test_progressbar_lands_on_final_position[iterate-7]",
+          "tests/test_termui.py::test_progressbar_lands_on_final_position[update-25]",
+          "tests/test_termui.py::test_progressbar_lands_on_final_position[update-3]",
+          "tests/test_termui.py::test_progressbar_lands_on_final_position[update-7]"
+        ]
+      },
+      {
+        "commit": "047adef258fc25566163ffc3efd14effc0ef7352",
+        "parent": "00e592cea702e0b2caa0dee42489fdb1c22cd845",
+        "subject": "Preserve declaration order of help option names",
+        "source_files": [
+          "src/click/core.py"
+        ],
+        "test_files": [
+          "tests/test_commands.py"
+        ],
+        "exec_changed": 3,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 103,
+        "detecting": [
+          "tests/test_commands.py::test_get_help_option_names[dedupe-and-conflict]",
+          "tests/test_commands.py::test_get_help_option_names[dedupe-spread]",
+          "tests/test_commands.py::test_get_help_option_names[order-short-long]",
+          "tests/test_commands.py::test_get_help_option_names[order-three-shuffled]"
+        ]
+      }
+    ],
+    "fault_skips": []
+  },
+  "tomlkit": {
+    "scanned": 300,
+    "change": [
+      {
+        "commit": "1bd7e3bc5bcc957d359a6c4d8e420163f32ac009",
+        "parent": "94e62fbef9d16093dec86728888474197f4a5cc7",
+        "subject": "chore: release 0.15..1",
+        "source_files": [
+          "tomlkit/__init__.py"
+        ],
+        "test_files": [],
+        "exec_changed": 1,
+        "inside_existing": false
+      },
+      {
+        "commit": "94e62fbef9d16093dec86728888474197f4a5cc7",
+        "parent": "495a42ecc9119eaaeb895def0fd025a71cd1cf60",
+        "subject": "Float is not a sequence  (#563)",
+        "source_files": [
+          "tomlkit/items.py"
+        ],
+        "test_files": [
+          "tests/test_items.py"
+        ],
+        "exec_changed": 5,
+        "inside_existing": false
+      },
+      {
+        "commit": "495a42ecc9119eaaeb895def0fd025a71cd1cf60",
+        "parent": "21a4942ed31e773061c9fc047d55b1bb3c637ee3",
+        "subject": "Fix top-level scalar captured by a table rendered from a dotted key (#550)",
+        "source_files": [
+          "tomlkit/container.py"
+        ],
+        "test_files": [
+          "tests/test_toml_document.py"
+        ],
+        "exec_changed": 12,
+        "inside_existing": false
+      }
+    ],
+    "fault": [
+      {
+        "commit": "21a4942ed31e773061c9fc047d55b1bb3c637ee3",
+        "parent": "8cd44f58b499da3c80a29bc877a512665a15e0bb",
+        "subject": "reject a comment containing line breaks in Item.comment and add_line (#544)",
+        "source_files": [
+          "tomlkit/items.py"
+        ],
+        "test_files": [
+          "tests/test_items.py"
+        ],
+        "exec_changed": 4,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 85,
+        "detecting": [
+          "tests/test_items.py::test_array_add_line_multiline_comment_is_rejected",
+          "tests/test_items.py::test_comment_method_multiline_comment_is_rejected"
+        ]
+      },
+      {
+        "commit": "8cd44f58b499da3c80a29bc877a512665a15e0bb",
+        "parent": "67d3e86502706df2a9ed67114ab67e25bcdcbbb7",
+        "subject": "fix: preserve leading newline of multiline string built with string() (#551)",
+        "source_files": [
+          "tomlkit/items.py"
+        ],
+        "test_files": [
+          "tests/test_api.py"
+        ],
+        "exec_changed": 2,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 157,
+        "detecting": [
+          "tests/test_api.py::test_create_multiline_string_with_leading_newline_round_trips[kwargs0-\\n]",
+          "tests/test_api.py::test_create_multiline_string_with_leading_newline_round_trips[kwargs1-\\nMy\\nString\\n]",
+          "tests/test_api.py::test_create_multiline_string_with_leading_newline_round_trips[kwargs2-\\r\\nMy\\nString]",
+          "tests/test_api.py::test_create_multiline_string_with_leading_newline_round_trips[kwargs3-\\nMy\\nString]",
+          "tests/test_api.py::test_create_multiline_string_with_leading_newline_round_trips[kwargs4-\\r\\nMy\\nString]",
+          "tests/test_api.py::test_create_string[kwargs13-\\nMy\\nString\\n-\"\"\"\\n\\nMy\\nString\\n\"\"\"]"
+        ]
+      }
+    ],
+    "fault_skips": []
+  },
+  "cachetools": {
+    "scanned": 300,
+    "change": [
+      {
+        "commit": "9976f1a8076631560f49c5b0dfda7e4d00ee0a4a",
+        "parent": "ffe21c44d3f7de9c7a89870c8cf1fd7aa583a2ae",
+        "subject": "Release v7.2.1.",
+        "source_files": [
+          "src/cachetools/__init__.py"
+        ],
+        "test_files": [],
+        "exec_changed": 1,
+        "inside_existing": false
+      },
+      {
+        "commit": "ffe21c44d3f7de9c7a89870c8cf1fd7aa583a2ae",
+        "parent": "110fe5d03e7b4b8f5c5ec97533c94254cdf8733f",
+        "subject": "Fix #430: Honor falsey getsizeof callables (#431)",
+        "source_files": [
+          "src/cachetools/__init__.py"
+        ],
+        "test_files": [],
+        "exec_changed": 1,
+        "inside_existing": true
+      },
+      {
+        "commit": "bcf9e8176ebe16da58751fce971c98ffe045ede1",
+        "parent": "eadb91cc9d54a57d6738386bc5c575ff3c7d22ec",
+        "subject": "Fix #423: Detect an empty RRCache before calling choice.",
+        "source_files": [
+          "src/cachetools/__init__.py"
+        ],
+        "test_files": [
+          "tests/test_rr.py"
+        ],
+        "exec_changed": 4,
+        "inside_existing": true
+      }
+    ],
+    "fault": [
+      {
+        "commit": "bcf9e8176ebe16da58751fce971c98ffe045ede1",
+        "parent": "eadb91cc9d54a57d6738386bc5c575ff3c7d22ec",
+        "subject": "Fix #423: Detect an empty RRCache before calling choice.",
+        "source_files": [
+          "src/cachetools/__init__.py"
+        ],
+        "test_files": [
+          "tests/test_rr.py"
+        ],
+        "exec_changed": 4,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 29,
+        "detecting": [
+          "tests/test_rr.py::RRCacheTest::test_rr_popitem_empty_custom_choice"
+        ]
+      },
+      {
+        "commit": "c0fdf6abab38040947d6fe2e38c507401d5e2350",
+        "parent": "978d34d40cdbf3b4cbfce104f3166032cc4ea028",
+        "subject": "Fix TLRUCache silently keeping stale value on expired overwrite",
+        "source_files": [
+          "src/cachetools/__init__.py"
+        ],
+        "test_files": [
+          "tests/test_tlru.py"
+        ],
+        "exec_changed": 6,
+        "inside_existing": true,
+        "ok": true,
+        "why": null,
+        "passed_on_commit": 28,
+        "detecting": [
+          "tests/test_tlru.py::TLRUCacheTest::test_overwrite_existing_with_expired"
+        ]
+      }
+    ],
+    "fault_skips": [
+      {
+        "commit": "dd181c5a72a74fcc01045c17cc943f72cb521262",
+        "why": "no test distinguishes the versions"
+      },
+      {
+        "commit": "39b31bc9b63abe98497409945e9d382d8918c8fb",
+        "why": "no test distinguishes the versions"
+      }
+    ]
+  }
+}

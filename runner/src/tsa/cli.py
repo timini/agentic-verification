@@ -31,6 +31,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--budget-minutes", type=float, default=minutes)
         p.add_argument("--max-mutants", type=int, default=None)
         p.add_argument("--out", default=None, help="output root (default: <path>/.test-suite-audit)")
+        p.add_argument("--python", default=None, help="interpreter of the project's environment (overrides config)")
         if name == "verify":
             p.add_argument("--base", default="HEAD", help="git revision to compare with (default: HEAD, "
                            "i.e. uncommitted changes); use a branch such as main for a whole branch")
@@ -53,6 +54,10 @@ def main(argv: list[str] | None = None) -> int:
         return _replay(Path(args.run), args.mutant, args.all)
 
     cfg = config.load(Path(args.path))
+    if args.python:
+        from dataclasses import replace
+        cfg.project = replace(cfg.project, python=Path(args.python))
+        cfg.discovered["python"] = "--python"
     out_root = Path(args.out) if args.out else cfg.project.root / ".test-suite-audit"
     extra: dict = {}
     if args.cmd == "verify":

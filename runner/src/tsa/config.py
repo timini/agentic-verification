@@ -22,12 +22,30 @@ class AuditConfig:
     workers: int = 4
 
 
+MARKERS = (CONFIG_NAME, "pyproject.toml", "setup.cfg", "setup.py", "pytest.ini", "tox.ini")
+
+
+def project_root(path: Path) -> Path:
+    """The nearest directory at or above ``path`` that looks like a project root.
+
+    Agents often pass a package directory; the audit needs the directory pytest runs in.
+    """
+    path = path.resolve()
+    for d in (path, *path.parents):
+        if any((d / m).exists() for m in MARKERS):
+            return d
+    return path
+
+
 def load(root: Path) -> AuditConfig:
-    root = root.resolve()
+    given = root.resolve()
+    root = project_root(given)
     data: dict = {}
     if (root / CONFIG_NAME).exists():
         data = tomllib.loads((root / CONFIG_NAME).read_text())
     found: dict[str, str] = {}
+    if root != given:
+        found["root"] = f"{root} (the project root above {given})"
 
     python = data.get("python")
     if python:

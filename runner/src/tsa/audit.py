@@ -508,17 +508,28 @@ def _verdict(st: AuditState) -> None:
         reasons.append(f"{plural(ch['uncovered_changed_lines'], 'changed line')} not run by any test")
     if surv:
         reasons.append(f"{len(surv)} of {plural(len(res), 'mutant')} on the changed lines survived")
+    # Failing, varying and order-dependent tests are left out of mutant scope, so they can only
+    # make the verdict more cautious. They are reported as a caveat, not as a gap in the change.
     b = st.baseline
-    if b.get("failing") or b.get("varying") or (st.flakiness or {}).get("order_dependent"):
-        reasons.append("the suite is not green and deterministic on this checkout")
+    unsound = len(b.get("failing", [])) + len(b.get("varying", [])) + len((st.flakiness or {}).get("order_dependent", []))
+    caveats = [f"{plural(unsound, 'test')} failed, varied or depended on order on this checkout and "
+               "did not count; fix them, since they may cover the change"] if unsound else []
     incomplete = st.status != "complete" or "coverage" in st.not_assessed or st.mutation.get("not_run")
     if incomplete:
         reasons.append("not every mutant on the changed lines ran")
-    ch["verdict"] = "gaps" if (surv or ch["uncovered_changed_lines"] or (reasons and not incomplete)) else (
-        "incomplete" if incomplete else "verified")
+    valid = [r for r in res if r["status"] in (model.KILLED, model.SURVIVED)]
+    if not valid and ch["changed_executable_lines"]:
+        # No evidence either way, so the change cannot be called verified.
+        incomplete = True
+        reasons.append("no valid mutant applies to the changed lines (decorated functions, generators and "
+                       "module-level code are not mutated); check them by reading the tests")
+    ch["verdict"] = "gaps" if (surv or ch["uncovered_changed_lines"]) else ("incomplete" if incomplete else "verified")
     if ch["verdict"] == "verified":
-        reasons.append(f"all {len(res)} mutants on the changed lines were killed and every changed line is run")
-    ch["reasons"] = reasons
+        killed = sum(r["status"] == model.KILLED for r in res)
+        other = len(res) - killed
+        reasons.append(f"all {plural(killed, 'valid mutant')} on the changed lines were killed and every changed line is run"
+                       + (f"; {other} more did not count (invalid, timed out or not activated)" if other else ""))
+    ch["reasons"] = reasons + caveats
     ch["killed"] = sum(r["status"] == model.KILLED for r in res)
     ch["survived"] = len(surv)
     # Tests added or changed in this change that run changed code but catch none of its mutants.
@@ -530,7 +541,32 @@ def _verdict(st: AuditState) -> None:
             for t in r["killers"]:
                 kills[t] += 1
     ch["changed_tests_without_kills"] = sorted(
-        t for t in in_scope if t.split("::", 1)[0] in ch["test_files"] and not kills[t])
+        t for t in in_scope if not kills[t] and _test_changed(st, t))
+
+
+def _test_changed(st: AuditState, nodeid: str) -> bool:
+    """True if any line of the test function itself changed (not just its file)."""
+    import ast
+
+    rel, _, rest = nodeid.partition("::")
+    changed = st.changed.lines.get(rel) if st.changed else None
+    if not changed:
+        return False
+    names = [n.split("[", 1)[0] for n in rest.split("::")]
+    try:
+        tree = ast.parse((st.cfg.project.root / rel).read_text())
+    except (OSError, SyntaxError):
+        return True
+    body = tree.body
+    node = None
+    for name in names:
+        node = next((n for n in body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+                     and n.name == name), None)
+        if node is None:
+            return True  # cannot locate it; count it rather than hide it
+        body = node.body
+    first = min([node.lineno] + [d.lineno for d in getattr(node, "decorator_list", [])])
+    return any(first <= n <= node.end_lineno for n in changed)
 
 
 def _is_protected(st: AuditState, test: str) -> bool:

@@ -726,6 +726,200 @@ def _h5_ratio(recs):
     return statistics.median(ratios) if ratios else math.nan
 
 
+# ---------------------------------------------------------------- H7, H8 and the verify benchmark
+
+def _minutes(start: str, end: str) -> float:
+    from datetime import datetime
+    f = "%Y-%m-%dT%H:%M:%S"
+    return (datetime.strptime(end, f) - datetime.strptime(start, f)).total_seconds() / 60
+
+
+def h7() -> None:
+    rows, recs = [], []
+    for p in PROJECTS:
+        rs = [r for r in latest("e7_changes", p) if r["kind"] == "verify"]
+        recs += rs
+        if not rs:
+            continue
+        for r in rs:
+            res = r["mutation"].get("results", [])
+            k = sum(x["status"] == "killed" for x in res)
+            sv = sum(x["status"] == "survived" for x in res)
+            u = sum(x["status"] == "uncovered" for x in res)
+            ch = r["change"]
+            # The verdict is recomputed from the raw results by the pre-registered definition, so it
+            # does not depend on the runner version's verdict wording (see VERIFY_BENCHMARK.md deviation 2).
+            if not ch.get("source_files"):
+                verdict = "no change"
+            elif sv or ch["uncovered_changed_lines"]:
+                verdict = "gaps"
+            elif r["mutation"].get("not_run") or not (k + sv):
+                verdict = "incomplete"
+            else:
+                verdict = "verified"
+            rows.append({"Project": p, "Commit": r["commit"][:8], "Lines": ch["changed_executable_lines"],
+                         "Uncovered lines": ch["uncovered_changed_lines"], "Mutants": len(res), "Killed": k,
+                         "Survived": sv, "Uncovered": u, "Verdict": verdict,
+                         "Minutes": round(_minutes(r["started"], r["finished"]), 1)})
+    if not rows:
+        return
+    df = pd.DataFrame(rows)
+    table("h7", df, "H7: \\texttt{verify} on the three most recent commits per project that change executable "
+          "production lines, with the project's own tests at that commit. \\emph{Lines}: changed executable lines; "
+          "\\emph{Uncovered lines}: changed lines no test runs; mutant counts are for mutants on the changed lines.", "tab:h7")
+    judged = df[df["Verdict"].isin(["gaps", "verified"])]
+    n, g = len(judged), int((judged["Verdict"] == "gaps").sum())
+    lo, hi = wilson(g, n)
+    macro("HSevenCommits", len(df))
+    macro("HSevenJudged", n)
+    macro("HSevenGaps", g)
+    macro("HSevenGapShare", pct(g / n) if n else "n/a")
+    macro("HSevenGapShareLo", pct(lo))
+    macro("HSevenGapShareHi", pct(hi))
+    macro("HSevenIncomplete", int((df["Verdict"] == "incomplete").sum()))
+    macro("HSevenNoChange", int((df["Verdict"] == "no change").sum()))
+    macro("HSevenWithSurvivor", int((judged["Survived"] > 0).sum()))
+    macro("HSevenWithUncovered", int((judged["Uncovered lines"] > 0).sum()))
+    kk, ss, uu = df["Killed"].sum(), df["Survived"].sum(), df["Uncovered"].sum()
+    macro("HSevenRate", pct(kk / (kk + ss + uu)) if kk + ss + uu else "n/a")
+    macro("HSevenMutants", int(df["Mutants"].sum()))
+    macro("HSevenSurvivors", int(ss))
+    macro("HSevenMedianMinutes", f"{df['Minutes'].median():.1f}")
+    macro("HSevenSupported", "supported" if n and g / n >= 0.5 else "not supported")
+
+
+def h8() -> None:
+    rows = []
+    killed_all = lost_all = 0
+    for p in PROJECTS:
+        rs = latest("e8_prune", p)
+        deep = [r for r in rs if r["kind"] == "deep"]
+        prune = [r for r in rs if r["kind"] == "prune"]
+        if not deep or not prune:
+            continue
+        d, pr = deep[-1], prune[-1]
+        ef = d["efficacy"] or {}
+        cand = ef.get("removal_candidates", [])
+        tests = d["baseline"]["stable_pass"]
+        if pr.get("verdict") == "no candidates":
+            rows.append({"Project": p, "Tests": tests, "Candidates": 0, "Share": "0%", "Time share": "--",
+                         "Held-out run": 0, "Killed": 0, "Kills lost": 0, "Lines lost": 0, "Weak tests": len(ef.get("weak_tests", [])),
+                         "Verdict": "no candidates"})
+            continue
+        q = pr["prune"]
+        killed, lost = q.get("mutants_killed", 0), len(q.get("kills_lost", []))
+        killed_all += killed
+        lost_all += lost
+        suite = ef.get("suite_seconds") or 0
+        rows.append({"Project": p, "Tests": tests, "Candidates": len(cand), "Share": f"{100 * len(cand) / tests:.0f}%",
+                     "Time share": f"{100 * ef.get('removal_seconds', 0) / suite:.0f}%" if suite else "--",
+                     "Held-out run": q.get("mutants_run", 0), "Killed": killed, "Kills lost": lost,
+                     "Lines lost": q.get("coverage_lost_lines", 0), "Weak tests": len(ef.get("weak_tests", [])),
+                     "Verdict": q.get("verdict")})
+    if not rows:
+        return
+    df = pd.DataFrame(rows)
+    table("h8", df, "H8: removal sets proposed by \\texttt{deep} (20 minutes), checked by \\texttt{prune-check} on "
+          "mutants the audit did not use (20 minutes). \\emph{Share}: candidates as a share of tests that passed every "
+          "baseline run; \\emph{Time share}: their summed duration as a share of the suite's; \\emph{Kills lost}: held-out "
+          "mutants killed only by candidates; \\emph{Lines lost}: lines run only by candidates; \\emph{Weak tests}: tests "
+          "that ran against at least five valid mutants and killed none.", "tab:h8")
+    lo, hi = wilson(lost_all, killed_all)
+    macro("HEightProjects", len(df))
+    macro("HEightKilled", f"{killed_all:,}".replace(",", "{,}"))
+    macro("HEightLost", lost_all)
+    macro("HEightLostShare", pct(lost_all / killed_all) if killed_all else "n/a")
+    macro("HEightLostShareLo", pct(lo))
+    macro("HEightLostShareHi", pct(hi))
+    macro("HEightRefuted", int((df["Verdict"] == "refuted").sum()))
+    macro("HEightNotRefuted", int((df["Verdict"] == "not refuted").sum()))
+    macro("HEightCandidates", int(df["Candidates"].sum()))
+    macro("HEightTests", int(df["Tests"].sum()))
+    macro("HEightCandidateShare", pct(df["Candidates"].sum() / df["Tests"].sum()))
+    macro("HEightSupported", "supported" if killed_all and lost_all / killed_all < 0.02 else "not supported")
+
+
+def bench2() -> None:
+    import json as _json
+
+    mp = STUDY / "data" / "bench2" / "measurements.jsonl"
+    if not mp.exists():
+        return
+    last = {}
+    for l in mp.read_text().splitlines():
+        if l.strip():
+            r = _json.loads(l)
+            last[(r["arm"], r["task"])] = r
+    ev = STUDY / "data" / "bench2" / "events.jsonl"
+    times = defaultdict(dict)
+    if ev.exists():
+        for l in ev.read_text().splitlines():
+            e = _json.loads(l)
+            times[(e["arm"], e["task"])][e["event"]] = e["ms"] if e["event"] == "duration" else e["ts"]
+    tasks = sorted({t for a, t in last if a in ("skill", "baseline")})
+    rows = []
+    for arm, key in (("skill", "Skill"), ("baseline", "Base"), ("upstream", "Up")):
+        rs = [last[(arm, t)] for t in tasks if (arm, t) in last]
+        rates = [r["verify"]["rate"] for r in rs if r["verify"]["rate"] is not None]
+        k = sum(r["verify"]["killed"] for r in rs)
+        sv = sum(r["verify"]["survived"] for r in rs)
+        u = sum(r["verify"]["uncovered"] for r in rs)
+        macro(f"VTwo{key}Rate", pct(k / (k + sv + u)) if k + sv + u else "n/a")
+        macro(f"VTwo{key}Median", pct(statistics.median(rates)) if rates else "n/a")
+        macro(f"VTwo{key}Verified", sum(r["verify"]["verdict"] == "verified" for r in rs))
+        row = {"Arm": arm, "Tasks": len(rs), "Pooled detection": f"{100 * k / (k + sv + u):.0f}%" if k + sv + u else "--",
+               "Verified verdicts": sum(r["verify"]["verdict"] == "verified" for r in rs)}
+        if arm != "upstream":
+            det = sum(r["detects_fault"] for r in rs)
+            lo, hi = wilson(det, len(rs))
+            # The agent's own reported duration; start and end events are only a fallback.
+            mins = [times[(arm, r["task"])]["duration"] / 60000 if "duration" in times[(arm, r["task"])]
+                    else (times[(arm, r["task"])]["end"] - times[(arm, r["task"])]["start"]) / 60
+                    for r in rs if "duration" in times[(arm, r["task"])] or "end" in times[(arm, r["task"])]]
+            macro(f"VOne{key}", det)
+            macro(f"VOne{key}Lo", pct(lo))
+            macro(f"VOne{key}Hi", pct(hi))
+            macro(f"VThree{key}Source", sum(r["source_modified"] for r in rs))
+            macro(f"VThree{key}Removed", sum(bool(r["tests_removed"]) for r in rs))
+            macro(f"VFour{key}", sum(bool(r["failing_on_commit"]) for r in rs))
+            macro(f"VTests{key}", statistics.median([len(r["tests_added"]) for r in rs]) if rs else "n/a")
+            macro(f"VMinutes{key}", f"{statistics.median(mins):.1f}" if mins else "n/a")
+            row.update({"Detect real change": f"{det}/{len(rs)}", "Source edited": sum(r["source_modified"] for r in rs),
+                        "Tests removed": sum(bool(r["tests_removed"]) for r in rs),
+                        "Left failing": sum(bool(r["failing_on_commit"]) for r in rs),
+                        "Median tests added": statistics.median([len(r["tests_added"]) for r in rs]) if rs else "--",
+                        "Median minutes": f"{statistics.median(mins):.1f}" if mins else "--"})
+        rows.append(row)
+    macro("VTasks", len(tasks))
+    both = so = bo = neither = 0
+    prow = []
+    for t in tasks:
+        s_, b_ = last.get(("skill", t)), last.get(("baseline", t))
+        if not s_ or not b_:
+            continue
+        a, b = s_["detects_fault"], b_["detects_fault"]
+        both += a and b
+        so += a and not b
+        bo += b and not a
+        neither += not a and not b
+        up = last.get(("upstream", t))
+        prow.append({"Task": t, "Skill detects": "yes" if a else "no", "Baseline detects": "yes" if b else "no",
+                     "Skill detection": f"{100 * s_['verify']['rate']:.0f}%" if s_["verify"]["rate"] is not None else "--",
+                     "Baseline detection": f"{100 * b_['verify']['rate']:.0f}%" if b_["verify"]["rate"] is not None else "--",
+                     "Upstream detection": f"{100 * up['verify']['rate']:.0f}%" if up and up["verify"]["rate"] is not None else "--"})
+    macro("VPairBoth", both)
+    macro("VPairSkillOnly", so)
+    macro("VPairBaseOnly", bo)
+    macro("VPairNeither", neither)
+    table("bench2", pd.DataFrame(rows), "Verify benchmark, measured independently on copies of the final workspaces "
+          "with production source restored. \\emph{Detect real change}: at least one test in a file the agent created "
+          "or changed passes on the commit's source and fails on the parent's (V1). \\emph{Pooled detection}: "
+          "K/(K+S+U) over mutants on the changed lines (V2). \\emph{upstream}: the developers' own tests for the "
+          "commit, measured the same way.", "tab:bench2")
+    if prow:
+        table("bench2_tasks", pd.DataFrame(prow), "Verify benchmark per task.", "tab:bench2tasks")
+
+
 def write_macros() -> None:
     lines = ["% Generated by study/analysis/run.py. Do not edit."]
     for k, v in sorted(macros.items()):
@@ -736,7 +930,7 @@ def write_macros() -> None:
 def main() -> None:
     for d in (DERIVED, GEN, FIG):
         d.mkdir(parents=True, exist_ok=True)
-    for step in (corpus_table, h1, h2, h3, h4, h5, h6, bench, replication):
+    for step in (corpus_table, h1, h2, h3, h4, h5, h6, bench, replication, h7, h8, bench2):
         step()
         print(f"{step.__name__}: ok", flush=True)
     write_macros()

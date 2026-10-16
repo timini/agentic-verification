@@ -1,0 +1,62 @@
+name: Agentic Verification
+description: Run every mutant of the lines a pull request changes and fail if the tests miss any.
+author: Tim Richardson
+branding:
+  icon: check-circle
+  color: orange
+
+inputs:
+  path:
+    description: Project directory (where pytest runs).
+    default: "."
+  base:
+    description: Git revision to compare with. Default for pull requests is origin/<base branch>, otherwise HEAD~1.
+    default: ""
+  python:
+    description: Interpreter of the project's environment, with pytest and pytest-cov installed. Default is .venv/bin/python, then python3 on PATH.
+    default: ""
+  budget-minutes:
+    description: Time budget for the verify run.
+    default: "15"
+  fail-on-gaps:
+    description: Fail the step when the verdict is gaps or incomplete.
+    default: "true"
+
+outputs:
+  verdict:
+    description: verified, gaps, incomplete or no change.
+    value: ${{ steps.verify.outputs.verdict }}
+  report:
+    description: Path to report.md.
+    value: ${{ steps.verify.outputs.report }}
+
+runs:
+  using: composite
+  steps:
+    - uses: astral-sh/setup-uv@v6
+    - id: verify
+      shell: bash
+      env:
+        AV_PATH: ${{ inputs.path }}
+        AV_BASE: ${{ inputs.base }}
+        AV_PYTHON: ${{ inputs.python }}
+        AV_BUDGET: ${{ inputs.budget-minutes }}
+        AV_FAIL: ${{ inputs.fail-on-gaps }}
+        AV_RUNNER: ${{ github.action_path }}/runner
+      run: |
+        base="$AV_BASE"
+        if [ -z "$base" ]; then
+          if [ -n "$GITHUB_BASE_REF" ]; then base="origin/$GITHUB_BASE_REF"; else base="HEAD~1"; fi
+        fi
+        args=(verify "$AV_PATH" --base "$base" --budget-minutes "$AV_BUDGET")
+        [ -n "$AV_PYTHON" ] && args+=(--python "$AV_PYTHON")
+        uvx --from "$AV_RUNNER" agentic-verification "${args[@]}" > "$RUNNER_TEMP/av.json"
+        verdict=$(tail -1 "$RUNNER_TEMP/av.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["verdict"])')
+        report=$(tail -1 "$RUNNER_TEMP/av.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["report_md"])')
+        echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+        echo "report=$report" >> "$GITHUB_OUTPUT"
+        cat "$report" >> "$GITHUB_STEP_SUMMARY"
+        if [ "$AV_FAIL" = "true" ] && { [ "$verdict" = "gaps" ] || [ "$verdict" = "incomplete" ]; }; then
+          echo "::error::Agentic Verification verdict: $verdict. See the job summary."
+          exit 1
+        fi

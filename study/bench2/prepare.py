@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import sys
 
-from bench2.common import DATA, ROOT, build_repo, commits, entry, file_hash, make_venv, write_config
+from bench2.common import DATA, repo, ROOT, build_repo, commits, entry, file_hash, make_venv, write_config
 from tsa.pytest_run import run_pytest
 from tsa.config import load
 
@@ -34,7 +34,7 @@ def prepare(name: str, c: dict, arm: str) -> dict:
     py = make_venv(e, ws)
     write_config(e, ws, py)
     collected = run_pytest(load(ws).project, collect_only=True, timeout_s=600).collected or []
-    msg = subprocess.run(["git", "log", "-1", "--format=%B", c["commit"]], cwd=e.dir, capture_output=True,
+    msg = subprocess.run(["git", "log", "-1", "--format=%B", c["commit"]], cwd=repo(e), capture_output=True,
                          text=True, check=True).stdout.strip()
     return {"arm": arm, "project": name, "task": f"{name}-{c['commit'][:7]}", "commit": c["commit"],
             "parent": c["parent"], "workspace": str(ws), "message": msg, "source_files": c["source_files"],

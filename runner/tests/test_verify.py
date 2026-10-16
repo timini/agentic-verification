@@ -155,3 +155,12 @@ def test_removal_set_is_chosen_jointly(tmp_path):
     assert b in removable and c not in removable
     assert w in removable
     assert [x["test"] for x in st.efficacy["weak_tests"]] == [w]
+
+
+def test_change_without_mutants_is_not_verified(repo, tmp_path):
+    root = repo.project.root
+    _append(root / "src/known/orders.py", "\n\nimport functools\n\n\n@functools.cache\ndef rate() -> int:\n    return 3\n")
+    _append(root / "tests/test_orders.py", "\n\ndef test_rate():\n    assert orders.rate() == 3\n")
+    st = _verify(repo, tmp_path, "decorated")
+    assert st.change["verdict"] == "incomplete"
+    assert any("no valid mutant" in r for r in st.change["reasons"])

@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  runner-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv python install 3.12
+      - run: uv run -p 3.12 pytest -q
+        working-directory: runner
+
+  action-self-test:
+    # Makes a weakly tested change to the known-answer fixture and checks the action reports it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Fixture environment
+        working-directory: fixtures/known_answers
+        run: |
+          uv venv -p 3.12 .venv
+          uv pip install -p .venv/bin/python -e . pytest pytest-cov pytest-randomly
+      - name: Weakly tested change
+        working-directory: fixtures/known_answers
+        run: |
+          printf '\n\ndef tax(total: int) -> int:\n    if total < 0:\n        raise ValueError("negative total")\n    return total * 2 // 10\n' >> src/known/orders.py
+          printf '\n\ndef test_tax():\n    assert orders.tax(100) == 20\n' >> tests/test_orders.py
+      - id: av
+        uses: ./
+        with:
+          path: fixtures/known_answers
+          base: HEAD
+          python: fixtures/known_answers/.venv/bin/python
+          budget-minutes: "5"
+          fail-on-gaps: "false"
+      - name: Expect gaps
+        run: test "${{ steps.av.outputs.verdict }}" = gaps

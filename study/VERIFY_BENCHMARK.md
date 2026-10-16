@@ -66,3 +66,10 @@ For each corpus project, run `deep` with a 20-minute budget, then `prune-check` 
 With at most 16 tasks, results are counts with Wilson intervals and paired counts, not significance tests.
 
 ## Deviations
+1. 16 October 2026, during the runs: the workspace builder used `git archive`, which leaves submodules empty, so tomlkit's `tests/toml-test` conformance fixtures were missing and `tests/test_toml_tests.py` could not be collected. Both tomlkit baseline runs had already finished (they ran the other test files); the two tomlkit skill runs were in progress. The fixtures, at the commit each parent pins, were then added to all four tomlkit workspaces, untracked and ignored by git. The builder now fills submodules, so measurement copies, the upstream reference and H7 have them. H7 runs for tomlkit made before the fix are repeated.
+2. 16 October 2026, during the runs: the benchmark exposed three defects in how `verify` words its verdict. None changes which mutants are generated or how they are run.
+   - With no valid mutant on the changed lines (for example a decorated function), it said `verified`. It now says `incomplete`.
+   - A test failing on the pristine checkout, unrelated to the change, made the verdict `gaps`. Such tests are already left out of mutant scope, so they are now a caveat in the reasons.
+   - Timed-out and invalid mutants were counted among the killed in the summary sentence.
+
+   A fourth issue: the "changed tests that catch nothing" finding counted every test in an edited file. It now counts only tests whose own lines changed. The skill arm used the runner pinned at registration, so its agents saw the old wording, and the replies record what they saw. H7 was started before the fixes. Its verdicts are recomputed from the raw results by the definition registered above (a surviving mutant or uncovered line among the changed lines), so they do not depend on the wording. The runner also now resolves a package directory passed as the path to the project root: 6 of the 14 skill runs first passed a package directory and got `no change`.
