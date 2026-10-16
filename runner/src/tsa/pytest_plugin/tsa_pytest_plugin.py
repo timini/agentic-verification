@@ -62,12 +62,7 @@ def pytest_collection_modifyitems(session, config, items):
         if drop:
             config.hook.pytest_deselected(items=drop)
         items[:] = keep
-    collect_path = os.environ.get("TSA_COLLECT")
-    if collect_path:
-        with open(collect_path, "w") as fh:
-            for item in items:
-                markers = sorted({m.name for m in item.iter_markers()})
-                fh.write(json.dumps({"nodeid": item.nodeid, "markers": markers}) + "\n")
+
 
 
 def pytest_runtest_logreport(report):
@@ -94,3 +89,14 @@ def pytest_sessionfinish(session, exitstatus):
             json.dump({"hits": sorted(_act_hits) if _act_available else None}, fh)
     if _results_fh is not None:
         _results_fh.close()
+
+
+def pytest_collection_finish(session):
+    # After every plugin's deselection (for example a project's own -m filter), so the
+    # inventory counts the tests that will actually run.
+    collect_path = os.environ.get("TSA_COLLECT")
+    if collect_path:
+        with open(collect_path, "w") as fh:
+            for item in session.items:
+                markers = sorted({m.name for m in item.iter_markers()})
+                fh.write(json.dumps({"nodeid": item.nodeid, "markers": markers}) + "\n")
