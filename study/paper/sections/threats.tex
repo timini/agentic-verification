@@ -11,7 +11,7 @@
 
 \paragraph{Corpus.} Eight mature libraries are not representative of application code, which typically has more I/O, more mocking and more integration tests. Our results are likely to understate mock shielding and overstate unit-level determinism. We chose release commits, whose suites are expected to pass; the one exception (dateutil) was an environment effect of building from a git checkout.
 
-\paragraph{Platform.} All runs used one macOS arm64 machine. A Linux replication of H1, H3 and H5 is prepared as a GitHub Actions workflow (\texttt{.github/workflows/study-replication.yml}) but has not been run for this version of the paper. Timing results (H2, H5) are the most platform-sensitive.
+\paragraph{Platform.} The primary runs used one macOS arm64 machine. We replicated H1, H3 and H5 for two projects (\ReplProjects) on a GitHub Actions Linux runner (Table~\ref{tab:replication}); the per-project results agree closely with macOS. The replication reused the macOS per-test coverage maps stored in the repository, so it re-ran mutant execution, activation checks and timing on Linux but not coverage measurement. Timing results (H2, H5) remain the most platform-sensitive, and H2 was not replicated.
 
 \paragraph{Analyst.} The study was designed, run and analysed by the plugin's author. The pre-registration, the append-only raw data and generated numbers limit, but do not remove, that bias. The H2 usefulness review is done by the same person.
 
