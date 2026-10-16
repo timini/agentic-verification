@@ -4,8 +4,10 @@ import json
 from dataclasses import asdict
 from pathlib import Path
 
-from ..audit import SCHEMA_VERSION, AuditState
+from ..audit import SCHEMA_VERSION, AuditState, plural
 
+TITLES = {"quick": "Test suite audit (quick)", "deep": "Test suite audit (deep)",
+          "verify": "Change verification", "prune-check": "Removal check"}
 LABEL_TEXT = {"measured": "Measured", "inferred": "Inferred", "unverified": "Unverified", "not assessed": "Not assessed"}
 
 
@@ -13,7 +15,8 @@ def write(st: AuditState) -> tuple[Path, Path]:
     data = {
         "schema_version": SCHEMA_VERSION, "run": st.run, "inventory": st.inventory, "baseline": st.baseline,
         "timing": st.timing, "flakiness": st.flakiness or None, "coverage": st.coverage, "overlap": st.overlap,
-        "mutation": st.mutation, "not_assessed": st.not_assessed, "findings": [asdict(f) for f in st.findings],
+        "mutation": st.mutation, "change": st.change or None, "efficacy": st.efficacy or None,
+        "prune": st.prune or None, "not_assessed": st.not_assessed, "findings": [asdict(f) for f in st.findings],
     }
     jp = st.out_dir / "report.json"
     jp.write_text(json.dumps(data, indent=2, default=str))
@@ -24,9 +27,31 @@ def write(st: AuditState) -> tuple[Path, Path]:
 
 def markdown(st: AuditState) -> str:
     r = st.run
-    out = [f"# Test suite audit ({r['mode']})", "",
+    out = [f"# {TITLES[r['mode']]}", "",
            f"Run `{r['id']}`, status **{r['status']}**. Commit `{(r['fingerprint'].get('commit') or 'none')[:12]}`"
            + (" with uncommitted changes" if r["fingerprint"].get("dirty") else "") + f". Budget: {r['budget']}.", ""]
+    ch, pr = st.change, st.prune
+    if ch.get("verdict"):
+        out += [f"## Verdict: {ch['verdict']}", "",
+                f"Change since `{ch['base']}` (`{(ch.get('base_commit') or '')[:12]}`): "
+                f"{plural(ch['changed_executable_lines'], 'changed executable line')} in {plural(len(ch['source_files']), 'source file')}"
+                + (f", {ch.get('killed', 0)} of {st.mutation.get('run', 0)} mutants killed" if st.mutation.get("run") else "")
+                + ".", "", *[f"- {x}" for x in ch.get("reasons", [])], ""]
+        if ch.get("targeted_tests"):
+            files = " ".join(ch["targeted_test_files"][:12])
+            out += [f"Fast check: {plural(ch['targeted_tests'], 'test')} {'covers' if ch['targeted_tests'] == 1 else 'cover'} the changed lines, about "
+                    f"{ch['targeted_seconds']:.1f}s in total: `python -m pytest {files}`", ""]
+    if pr.get("verdict"):
+        out += [f"## Verdict: {pr['verdict']}", "",
+                f"{len(pr['tests'])} tests proposed for removal. They run {pr.get('lines_run_by_removed', 0)} lines; "
+                f"{pr.get('mutants_run', 0)} mutants on those lines ran against the whole suite"
+                + (f", none of them from the audit that proposed the set ({pr['excluded_mutants']} excluded)"
+                   if pr["excluded_mutants"] else "") + ".", ""]
+        if pr.get("note"):
+            out += [pr["note"], ""]
+        if pr.get("unknown"):
+            out += [f"{len(pr['unknown'])} listed tests were not found in the suite: "
+                    + ", ".join(f"`{t}`" for t in pr["unknown"][:5]), ""]
     actionable = [f for f in st.findings if f.label != "not assessed"]
     out += ["## Top findings", ""]
     if not actionable:
@@ -80,6 +105,13 @@ def markdown(st: AuditState) -> str:
         out += ["", f"Deletion mutants run first and in full ({done} {m['eligible']['deletion']} ran); classical mutants "
                 f"are a seeded sample filling the rest of the budget ({m['classical_sampled']} of "
                 f"{m['eligible']['classical']}). Patches are in `mutants/`.", ""]
+    ef = st.efficacy
+    if ef:
+        out += ["## Efficacy and bloat", "",
+                f"{len(ef['weak_tests'])} tests ran against valid mutants and caught none. "
+                f"{len(ef['removal_candidates'])} tests could be removed together without losing any of the "
+                f"{ef['kills_preserved']} observed kills or any covered line ({ef['removal_seconds']:.1f}s of "
+                f"{ef['suite_seconds']:.1f}s). {ef['note']}", ""]
     if st.not_assessed:
         out += ["## Not assessed", "", *[f"- {k}: {v}" for k, v in st.not_assessed.items()], ""]
     out += ["## Labels", "", "*Measured*: observed in this run. *Inferred*: derived from measurements, needs review. "

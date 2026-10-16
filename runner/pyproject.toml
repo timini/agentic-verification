@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tsa"
-version = "0.1.0"
-description = "Deterministic runner for the Test Suite Auditor Claude Code plugin"
+version = "0.3.0"
+description = "Runner for the Agentic Verification Claude Code plugin: measures whether a pytest suite would catch broken code"
 requires-python = ">=3.12"
 dependencies = [
     # Exact pin: we call mutmut's operator generator directly, which is not a public API.
@@ -16,6 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
+agentic-verification = "tsa.cli:main"
 tsa = "tsa.cli:main"
 
 [dependency-groups]

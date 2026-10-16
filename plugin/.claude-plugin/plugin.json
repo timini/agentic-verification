@@ -1,8 +1,8 @@
 {
   "name": "agentic-verification",
   "displayName": "Agentic Verification",
-  "version": "0.2.0",
-  "description": "Check that the tests guarding your code actually catch faults: audit a pytest suite for cost, order-dependent and intermittent failures, coverage overlap, and behaviour no test notices when it is removed. Report-only.",
+  "version": "0.3.0",
+  "description": "Agentic verification for Python/pytest. Verify a change: run every mutant of the changed lines and write tests until the tests catch them. Audit a suite: find what it would not catch, what makes it too slow or flaky for an agent loop, and which tests can go without losing detection.",
   "author": {
     "name": "Tim Richardson",
     "url": "https://github.com/timini"
