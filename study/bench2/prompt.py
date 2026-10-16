@@ -9,7 +9,7 @@ from pathlib import Path
 from bench2.common import DATA
 
 REPO = Path(__file__).resolve().parents[2]
-PIN = "51a17eb0da02fa5745f2da253c85c99ad59c5a9b"
+PIN = "4ad81ab0621cf327df921042cf203bd383abcf16"  # 51a17eb before the history rewrite (study/COMMIT_MAP.md)
 
 TASK = """You are working in the Python repository at {ws}. Use its virtual environment, {ws}/.venv/bin/python, which has pytest installed; the tests are in {tests}.
 
