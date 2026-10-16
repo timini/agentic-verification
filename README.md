@@ -2,6 +2,10 @@
 
 Coding agents write a growing share of the code, so the tests that check it carry more of the weight. Agentic Verification is a Claude Code plugin that checks those tests: it audits a Python/pytest suite and reports, with evidence, which behaviour no test would notice if it broke, which tests are slow or depend on test order, and where coverage numbers are misleading. It is report-only: it never edits, skips or deletes tests.
 
+![Test pairs that run nearly the same lines (blue) still often catch different mutants](docs/images/coverage-vs-kills.png)
+
+*From the study: tests that run nearly the same lines (blue, coverage overlap 0.9 or more) often still catch different bugs, so overlap alone does not make a test redundant.*
+
 The name comes from Addy Osmani's essay [Agentic Verification](https://addyo.substack.com/p/agentic-verification). Every rule the plugin follows was tested first on eight open-source projects, and the plugin itself was benchmarked against the same agent without it. Both are in the [paper](study/paper/agentic-verification-study.pdf).
 
 ## What it reports
